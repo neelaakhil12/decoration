@@ -1,26 +1,146 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FAF7F2; /* Cream White */
+  --foreground: #5C2E46; /* Deep Plum */
+  --brand-gold: #D4A64A;
+  --brand-pink: #F6D6DA;
+  --brand-rosegold: #D89AA0;
+  --brand-plum: #5C2E46;
+  --brand-cream: #FAF7F2;
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-pink: var(--brand-pink);
+  --color-brand-rosegold: var(--brand-rosegold);
+  --color-brand-plum: var(--brand-plum);
+  --color-brand-cream: var(--brand-cream);
+
+  --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --animate-balloon-float-1: balloon-float-1 8s ease-in-out infinite;
+  --animate-balloon-float-2: balloon-float-2 10s ease-in-out infinite;
+  --animate-balloon-float-3: balloon-float-3 12s ease-in-out infinite;
+  --animate-sparkle-glow: sparkle-glow 3s ease-in-out infinite;
+  --animate-flower-bloom: flower-bloom 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-gold-shimmer: gold-shimmer 4s ease infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@keyframes balloon-float-1 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-25px) rotate(4deg); }
+}
+
+@keyframes balloon-float-2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-35px) rotate(-6deg); }
+}
+
+@keyframes balloon-float-3 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(3deg); }
+}
+
+@keyframes sparkle-glow {
+  0%, 100% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.2) rotate(15deg); filter: drop-shadow(0 0 10px rgba(212, 166, 74, 0.8)); }
+}
+
+@keyframes flower-bloom {
+  0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes gold-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Custom CSS classes for Premium styling */
+.text-luxury-gradient {
+  background: linear-gradient(135deg, #5C2E46 0%, #D89AA0 50%, #D4A64A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #D4A64A 0%, #E7C27A 50%, #D4A64A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #D4A64A 0%, #E7C27A 50%, #D4A64A 100%);
+}
+
+.bg-luxury-gradient {
+  background: linear-gradient(135deg, #5C2E46 0%, #8A4F6E 50%, #5C2E46 100%);
+}
+
+.bg-cream-gradient {
+  background: linear-gradient(180deg, #FAF7F2 0%, #F6D6DA 50%, #FAF7F2 100%);
+}
+
+/* Glassmorphism utility */
+.glassmorphism {
+  background: rgba(92, 46, 70, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 166, 74, 0.15);
+}
+
+.glassmorphism-dark {
+  background: rgba(92, 46, 70, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(212, 166, 74, 0.2);
+}
+
+.gold-glow {
+  box-shadow: 0 0 15px rgba(212, 166, 74, 0.25);
+  border-color: rgba(212, 166, 74, 0.4);
+}
+
+.gold-glow-hover:hover {
+  box-shadow: 0 0 25px rgba(212, 166, 74, 0.5);
+  border-color: rgba(212, 166, 74, 0.8);
+}
+
+.rose-glow-hover:hover {
+  box-shadow: 0 0 25px rgba(216, 154, 160, 0.4);
+  border-color: rgba(216, 154, 160, 0.8);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF7F2;
+}
+::-webkit-scrollbar-thumb {
+  background: #D89AA0;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D4A64A;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
 }

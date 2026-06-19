@@ -48,14 +48,14 @@ export default function ContactPage() {
               <div className="space-y-6">
                 {/* Phone Call */}
                 <div className="flex items-start space-x-4 bg-white p-5 rounded-2xl border border-brand-rosegold/10 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="bg-brand-gold/10 p-3 rounded-full border border-brand-gold/25">
+                  <div className="bg-brand-gold/10 p-3 rounded-full border border-brand-gold/25 shrink-0">
                     <Phone className="h-5 w-5 text-brand-gold" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h4 className="text-xs uppercase tracking-widest font-sans font-bold text-brand-plum/60 mb-1">
                       Call Support
                     </h4>
-                    <a href="tel:+917075555987" className="text-base font-serif font-semibold text-brand-plum hover:text-brand-gold transition-colors block">
+                    <a href="tel:+917075555987" className="text-sm sm:text-base font-serif font-semibold text-brand-plum hover:text-brand-gold transition-colors block break-words">
                       +91 70755 55987
                     </a>
                   </div>
@@ -63,14 +63,14 @@ export default function ContactPage() {
 
                 {/* Email Address */}
                 <div className="flex items-start space-x-4 bg-white p-5 rounded-2xl border border-brand-rosegold/10 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="bg-brand-gold/10 p-3 rounded-full border border-brand-gold/25">
+                  <div className="bg-brand-gold/10 p-3 rounded-full border border-brand-gold/25 shrink-0">
                     <Mail className="h-5 w-5 text-brand-gold" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h4 className="text-xs uppercase tracking-widest font-sans font-bold text-brand-plum/60 mb-1">
                       Email Address
                     </h4>
-                    <a href="mailto:info@decordazzlers.com" className="text-base font-serif font-semibold text-brand-plum hover:text-brand-gold transition-colors block">
+                    <a href="mailto:info@decordazzlers.com" className="text-sm sm:text-base font-serif font-semibold text-brand-plum hover:text-brand-gold transition-colors block break-all">
                       info@decordazzlers.com
                     </a>
                   </div>
@@ -78,10 +78,10 @@ export default function ContactPage() {
 
                 {/* Physical Location */}
                 <div className="flex items-start space-x-4 bg-white p-5 rounded-2xl border border-brand-rosegold/10 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="bg-brand-gold/10 p-3 rounded-full border border-brand-gold/25">
+                  <div className="bg-brand-gold/10 p-3 rounded-full border border-brand-gold/25 shrink-0">
                     <MapPin className="h-5 w-5 text-brand-gold" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h4 className="text-xs uppercase tracking-widest font-sans font-bold text-brand-plum/60 mb-1">
                       Design Studio
                     </h4>

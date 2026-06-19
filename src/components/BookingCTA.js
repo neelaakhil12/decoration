@@ -16,7 +16,7 @@ export default function BookingCTA() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="bg-white/40 border border-brand-gold/20 backdrop-blur-md rounded-3xl p-10 md:p-16 shadow-xl">
+        <div className="bg-white/40 border border-brand-gold/20 backdrop-blur-md rounded-3xl p-6 sm:p-10 md:p-16 shadow-xl">
           {/* Tagline */}
           <div className="inline-flex items-center space-x-1.5 bg-brand-plum/5 border border-brand-rosegold/30 px-4 py-1.5 rounded-full mb-6">
             <Sparkles className="h-4 w-4 text-brand-gold" />

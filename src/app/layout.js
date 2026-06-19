@@ -17,8 +17,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className="bg-brand-cream text-brand-plum min-h-screen flex flex-col antialiased">
+    <html lang="en" className="scroll-smooth overflow-x-hidden max-w-full">
+      <body className="bg-brand-cream text-brand-plum min-h-screen flex flex-col antialiased overflow-x-hidden max-w-full">
         <AOSProvider>
           <Navbar />
           <main className="flex-grow pt-24">

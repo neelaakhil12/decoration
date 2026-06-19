@@ -36,7 +36,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Story Image wrapper */}
-            <div className="relative h-[450px] w-full rounded-3xl overflow-hidden border border-brand-gold/25 shadow-2xl" data-aos="fade-right">
+            <div className="relative h-[300px] sm:h-[450px] w-full rounded-3xl overflow-hidden border border-brand-gold/25 shadow-2xl" data-aos="fade-right">
               <img
                 src="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800&auto=format&fit=crop&q=80"
                 alt="Luxury Stage Decoration"

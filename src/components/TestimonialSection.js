@@ -68,7 +68,7 @@ export default function TestimonialSection() {
           {/* Navigation Buttons */}
           <button
             onClick={handlePrev}
-            className="absolute left-[-20px] md:left-[-60px] p-3 rounded-full bg-brand-cream/10 border border-brand-gold/20 text-brand-cream hover:bg-brand-gold hover:text-brand-plum transition-all duration-300 z-20 cursor-pointer"
+            className="absolute left-2 md:left-[-60px] p-3 rounded-full bg-brand-cream/10 border border-brand-gold/20 text-brand-cream hover:bg-brand-gold hover:text-brand-plum transition-all duration-300 z-20 cursor-pointer"
             aria-label="Previous Testimonial"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -76,7 +76,7 @@ export default function TestimonialSection() {
 
           <button
             onClick={handleNext}
-            className="absolute right-[-20px] md:right-[-60px] p-3 rounded-full bg-brand-cream/10 border border-brand-gold/20 text-brand-cream hover:bg-brand-gold hover:text-brand-plum transition-all duration-300 z-20 cursor-pointer"
+            className="absolute right-2 md:right-[-60px] p-3 rounded-full bg-brand-cream/10 border border-brand-gold/20 text-brand-cream hover:bg-brand-gold hover:text-brand-plum transition-all duration-300 z-20 cursor-pointer"
             aria-label="Next Testimonial"
           >
             <ChevronRight className="h-5 w-5" />

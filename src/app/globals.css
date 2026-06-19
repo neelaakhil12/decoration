@@ -134,11 +134,15 @@
   background: #D4A64A;
 }
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {

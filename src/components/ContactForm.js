@@ -77,7 +77,7 @@ export default function ContactForm() {
   };
 
   return (
-    <div className="bg-white p-8 md:p-10 rounded-3xl border border-brand-rosegold/15 shadow-xl relative overflow-hidden">
+    <div className="bg-white p-6 sm:p-8 md:p-10 rounded-3xl border border-brand-rosegold/15 shadow-xl relative overflow-hidden">
       {/* Background soft glow */}
       <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-gold/5 rounded-full blur-2xl pointer-events-none" />
 

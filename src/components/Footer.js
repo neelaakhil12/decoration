@@ -122,11 +122,11 @@ export default function Footer() {
                   </a>
                 </div>
               </li>
-              <li className="flex items-center space-x-3">
+              <li className="flex items-center space-x-3 min-w-0">
                 <Mail className="h-5 w-5 text-brand-gold shrink-0" />
                 <a
                   href="mailto:info@decordazzlers.com"
-                  className="hover:text-brand-gold transition-colors"
+                  className="hover:text-brand-gold transition-colors break-all"
                 >
                   info@decordazzlers.com
                 </a>

@@ -10,6 +10,7 @@ export default function AOSProvider({ children }) {
       once: false,
       easing: "ease-out-cubic",
       offset: 50,
+      disable: "mobile",
     });
     AOS.refresh();
   }, []);

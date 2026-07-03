@@ -130,37 +130,67 @@ export default function Hero({ onSelectCategory = () => {} }) {
         </div>
 
         {/* Categories Banner Grid (Ebo Grid Spanning Layout) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {categories.map((cat, idx) => (
-            <div
-              key={cat.name}
-              onClick={() => onSelectCategory(cat.key)}
-              className={`${cat.span} ${cat.aspect} relative rounded-2xl overflow-hidden border border-brand-rosegold/10 hover:border-brand-gold/60 transition-all duration-300 shadow-sm hover:shadow-xl cursor-pointer group shrink-0 bg-white`}
-              data-aos="fade-up"
-              data-aos-delay={(idx % 4) * 100}
-            >
-              <img
-                src={cat.image}
-                alt={cat.name}
-                className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                loading="lazy"
-              />
-              {/* Soft overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-plum/70 via-brand-plum/10 to-transparent flex flex-col justify-end p-4">
-                <div className="text-left text-white space-y-0.5">
-                  <p className="text-[11px] sm:text-xs font-sans tracking-widest font-black uppercase text-brand-gold">
-                    Explore
-                  </p>
-                  <h3 className="text-sm sm:text-base font-serif font-extrabold leading-tight text-white group-hover:text-brand-gold transition-colors">
+        <div className="grid grid-cols-4 gap-2.5 sm:gap-4">
+          {categories.map((cat, idx) => {
+            const isWide = idx < 2;
+            if (isWide) {
+              return (
+                <div
+                  key={cat.name}
+                  onClick={() => onSelectCategory(cat.key)}
+                  className="col-span-2 aspect-[1.8/1] relative rounded-xl sm:rounded-2xl overflow-hidden border border-brand-rosegold/10 hover:border-brand-gold/60 transition-all duration-300 shadow-sm hover:shadow-lg cursor-pointer group bg-white"
+                  data-aos="fade-up"
+                  data-aos-delay={(idx % 4) * 100}
+                >
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  {/* Soft overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-plum/85 via-brand-plum/20 to-transparent flex flex-col justify-end p-2 sm:p-4">
+                    <div className="text-left text-white">
+                      <p className="text-[8px] sm:text-[10px] font-sans tracking-widest font-black uppercase text-brand-gold">
+                        Explore
+                      </p>
+                      <h3 className="text-xs sm:text-base font-serif font-extrabold leading-tight text-white group-hover:text-brand-gold transition-colors">
+                        {cat.name}
+                      </h3>
+                    </div>
+                    <div className="absolute right-2 sm:right-4 bottom-2 sm:bottom-4 w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-brand-cream/10 border border-white/20 flex items-center justify-center text-white group-hover:bg-brand-gold group-hover:text-brand-plum transition-all duration-300 shadow-sm">
+                      <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </div>
+                  </div>
+                </div>
+              );
+            } else {
+              // Small category cards (4 per row)
+              return (
+                <div
+                  key={cat.name}
+                  onClick={() => onSelectCategory(cat.key)}
+                  className="col-span-1 flex flex-col items-center cursor-pointer group"
+                  data-aos="fade-up"
+                  data-aos-delay={(idx % 4) * 100}
+                >
+                  {/* Image wrapper */}
+                  <div className="w-full aspect-square rounded-xl sm:rounded-2xl overflow-hidden border border-brand-rosegold/10 group-hover:border-brand-gold/60 transition-all duration-300 shadow-sm hover:shadow-md bg-white">
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  </div>
+                  {/* Text underneath */}
+                  <span className="text-[10px] sm:text-xs font-sans font-bold mt-1.5 text-brand-plum group-hover:text-brand-gold text-center leading-tight line-clamp-1 w-full px-0.5">
                     {cat.name}
-                  </h3>
+                  </span>
                 </div>
-                <div className="absolute right-4 bottom-4 w-7 h-7 rounded-full bg-brand-cream/10 border border-white/20 flex items-center justify-center text-white group-hover:bg-brand-gold group-hover:text-brand-plum transition-all duration-300 shadow-md">
-                  <ArrowRight className="h-4 w-4" />
-                </div>
-              </div>
-            </div>
-          ))}
+              );
+            }
+          })}
         </div>
 
       </div>

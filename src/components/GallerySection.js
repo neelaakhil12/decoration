@@ -65,7 +65,7 @@ export default function GallerySection() {
       : galleryItems.filter((item) => item.category === activeCategory);
 
   return (
-    <section className="py-24 bg-brand-cream relative">
+    <section id="gallery" className="py-24 bg-brand-cream relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">

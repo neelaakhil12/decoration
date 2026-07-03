@@ -1,8 +1,7 @@
 import "./globals.css";
 import AOSProvider from "@/components/AOSProvider";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import FloatingActions from "@/components/FloatingActions";
+import { AppProvider } from "@/components/AppContext";
+import MainLayoutWrapper from "@/components/MainLayoutWrapper";
 
 export const viewport = {
   width: "device-width",
@@ -19,14 +18,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth overflow-x-hidden max-w-full">
       <body className="bg-brand-cream text-brand-plum min-h-screen flex flex-col antialiased overflow-x-hidden max-w-full">
-        <AOSProvider>
-          <Navbar />
-          <main className="flex-grow pt-24">
-            {children}
-          </main>
-          <Footer />
-          <FloatingActions />
-        </AOSProvider>
+        <AppProvider>
+          <AOSProvider>
+            <MainLayoutWrapper>
+              {children}
+            </MainLayoutWrapper>
+          </AOSProvider>
+        </AppProvider>
       </body>
     </html>
   );

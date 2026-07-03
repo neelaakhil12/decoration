@@ -148,3 +148,42 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: Georgia, Cambria, "Times New Roman", Times, serif;
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scroll-bar-remove::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scroll-bar-remove {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-skeleton-shimmer {
+  background: linear-gradient(90deg, rgba(212, 166, 74, 0.05) 25%, rgba(212, 166, 74, 0.15) 50%, rgba(212, 166, 74, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite linear;
+}
+
+/* 3D Rotating text animation custom configurations */
+.perspective-900 {
+  perspective: 900px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}

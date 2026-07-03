@@ -1,125 +1,168 @@
 "use client";
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Sparkles, Calendar, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight, Star } from "lucide-react";
 
-export default function Hero() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  
-  const slides = [
-    "/images/hero_slide_1.png",
-    "/images/hero_slide_2.png",
-    "/images/hero_slide_3.png",
-    "/images/hero_slide_4.png",
+export default function Hero({ onSelectCategory = () => {} }) {
+  const [celebrationIndex, setCelebrationIndex] = useState(0);
+  const [activeBanner, setActiveBanner] = useState(0);
+
+  const celebrations = [
+    "Birthday 🎂",
+    "Anniversary 💍",
+    "Kid's Party 🎈",
+    "Baby Shower 🍼",
+    "Welcome Baby 👶",
+    "Festival Decor 🪔"
+  ];
+
+  const promotionalBanners = [
+    {
+      title: "15% OFF First Order",
+      desc: "Transform your home with premium balloon layouts.",
+      image: "/images/promo_banner_1.png",
+      tag: "Limited Offer",
+      badge: "Save 15%"
+    },
+    {
+      title: "90-Min Same Day Delivery",
+      desc: "Instant decorations across major metro networks.",
+      image: "/images/promo_banner_2.png",
+      tag: "Express Setup",
+      badge: "Fast Delivery"
+    },
+    {
+      title: "Custom Dream Themes",
+      desc: "Tell our luxury decorators your unique vision.",
+      image: "/images/promo_banner_3.png",
+      tag: "Bespoke Art",
+      badge: "Premium"
+    }
+  ];
+
+  const categories = [
+    { name: "Birthday Decor", key: "Birthday", image: "/images/birthday_decor.png", span: "col-span-2", aspect: "aspect-[2/1]" },
+    { name: "Baby Welcome", key: "Baby Shower", image: "/images/welcome_baby_decor.png", span: "col-span-2", aspect: "aspect-[2/1]" },
+    { name: "Kid's Party", key: "Birthday", image: "/images/kids_birthday_decor.png", span: "col-span-1", aspect: "aspect-square" },
+    { name: "Anniversary", key: "Romantic", image: "/images/anniversary_decor.png", span: "col-span-1", aspect: "aspect-square" },
+    { name: "Baby Shower", key: "Baby Shower", image: "/images/baby_shower_decor.png", span: "col-span-1", aspect: "aspect-square" },
+    { name: "Stage & Wedding", key: "Stage & Wedding", image: "/images/stage_decor.png", span: "col-span-1", aspect: "aspect-square" },
+    { name: "House Warming", key: "Traditional", image: "/images/house_warming_decor.png", span: "col-span-1", aspect: "aspect-square" },
+    { name: "Festival Decor", key: "Traditional", image: "/images/festival_decor.png", span: "col-span-1", aspect: "aspect-square" },
+    { name: "Car Decor", key: "Specialty", image: "/images/car_decor.png", span: "col-span-1", aspect: "aspect-square" },
+    { name: "Pet Birthday", key: "Specialty", image: "/images/pet_decor.png", span: "col-span-1", aspect: "aspect-square" }
   ];
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 2000); // 2 seconds transition!
-    return () => clearInterval(timer);
+    const textTimer = setInterval(() => {
+      setCelebrationIndex((prev) => (prev + 1) % celebrations.length);
+    }, 2500);
+
+    const bannerTimer = setInterval(() => {
+      setActiveBanner((prev) => (prev + 1) % promotionalBanners.length);
+    }, 5000);
+
+    return () => {
+      clearInterval(textTimer);
+      clearInterval(bannerTimer);
+    };
   }, []);
 
   return (
-    <section className="relative overflow-hidden min-h-[85vh] flex items-center pt-2 pb-16">
-      {/* Slideshow background */}
-      <div className="absolute inset-0 z-0">
-        {slides.map((slide, index) => (
-          <div
-            key={slide}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              index === currentSlide ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            <img
-              src={slide}
-              alt={`Luxury Celebration Backdrop ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ))}
-      </div>
+    <section className="bg-brand-cream pt-6 pb-12 relative overflow-hidden">
+      {/* Decorative Glows */}
+      <div className="absolute top-10 left-[10%] w-72 h-72 bg-brand-gold/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 right-[10%] w-72 h-72 bg-brand-rosegold/10 rounded-full blur-3xl pointer-events-none" />
 
-
-
-      {/* Decorative Glow Blurs */}
-      <div className="absolute top-10 left-10 w-72 h-72 bg-brand-gold/15 rounded-full blur-3xl animate-pulse z-15" />
-      <div className="absolute bottom-10 right-10 w-96 h-96 bg-brand-rosegold/15 rounded-full blur-3xl animate-pulse z-15" />
-
-      {/* Custom CSS Floating Balloons */}
-      <div className="absolute top-1/4 left-[8%] hidden md:block animate-balloon-float-1 pointer-events-none z-20">
-        <div className="w-12 h-16 bg-gradient-to-t from-brand-rosegold to-brand-pink rounded-t-full rounded-b-[45%] relative shadow-lg">
-          <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-b-[6px] border-l-transparent border-r-transparent border-b-brand-rosegold" />
-          <div className="absolute bottom-[-26px] left-1/2 w-[1px] h-5 bg-brand-rosegold/60" />
-        </div>
-      </div>
-      <div className="absolute top-[15%] right-[10%] hidden md:block animate-balloon-float-2 pointer-events-none z-20">
-        <div className="w-14 h-18 bg-gradient-to-t from-brand-gold to-brand-pink/50 rounded-t-full rounded-b-[45%] relative shadow-lg">
-          <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-b-[6px] border-l-transparent border-r-transparent border-b-brand-gold" />
-          <div className="absolute bottom-[-26px] left-1/2 w-[1px] h-5 bg-brand-gold/60" />
-        </div>
-      </div>
-      <div className="absolute bottom-1/4 left-[15%] hidden md:block animate-balloon-float-3 pointer-events-none z-20">
-        <div className="w-10 h-14 bg-gradient-to-t from-brand-plum/40 to-brand-rosegold rounded-t-full rounded-b-[45%] relative shadow-lg">
-          <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-b-[6px] border-l-transparent border-r-transparent border-b-brand-rosegold" />
-          <div className="absolute bottom-[-26px] left-1/2 w-[1px] h-5 bg-brand-rosegold/60" />
-        </div>
-      </div>
-
-      {/* Sparkle Particles */}
-      <div className="absolute top-[20%] left-[25%] animate-sparkle-glow pointer-events-none z-20">
-        <Sparkles className="h-6 w-6 text-brand-gold" />
-      </div>
-      <div className="absolute bottom-[30%] right-[25%] animate-sparkle-glow pointer-events-none z-20" style={{ animationDelay: "1.5s" }}>
-        <Sparkles className="h-5 w-5 text-brand-rosegold" />
-      </div>
-
-      {/* Corner Flower Decorative SVG elements */}
-      <div className="absolute top-0 right-0 w-48 h-48 opacity-15 pointer-events-none hidden lg:block z-20">
-        <svg viewBox="0 0 100 100" className="w-full h-full fill-brand-plum">
-          <path d="M100,0 C80,10 60,30 50,50 C40,70 30,90 0,100 C20,90 40,70 50,50 C60,30 80,10 100,0 Z" />
-        </svg>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-30 text-center">
-        <div className="max-w-3xl mx-auto space-y-6">
-          {/* Tagline */}
-          <div className="inline-flex items-center space-x-2 bg-white/15 border border-white/25 px-4 py-2 rounded-full backdrop-blur-sm shadow-sm animate-bounce" data-aos="fade-down">
-            <Sparkles className="h-4 w-4 text-brand-gold animate-spin" style={{ animationDuration: '3s' }} />
-            <span className="text-xs uppercase tracking-widest font-sans font-bold text-white">
-              Decor Dazzlers Studio
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-white tracking-tight leading-tight drop-shadow-md" data-aos="fade-up" data-aos-delay="100">
-            Transforming Celebrations Into <span className="text-white block sm:inline font-serif italic">Magical Memories</span>
-          </h1>
-
-          {/* Subheadline */}
-          <p className="text-sm sm:text-base md:text-lg font-sans text-white max-w-2xl mx-auto leading-relaxed bg-brand-plum/30 backdrop-blur-[2px] rounded-2xl p-4 inline-block shadow-lg border border-white/10" data-aos="fade-up" data-aos-delay="200">
-            Step into a world of elegance. We craft bespoke, premium, and festive decorations tailored perfectly to capture the emotion of your special day.
-          </p>
-
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2" data-aos="fade-up" data-aos-delay="300">
-            <Link
-              href="/contact"
-              className="w-full sm:w-auto bg-gold-gradient text-brand-plum px-8 py-3.5 rounded-full font-sans text-xs tracking-wider uppercase font-bold shadow-lg hover:shadow-xl gold-glow-hover transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 relative z-10">
+        
+        {/* Promotional Sliders Section (Ebo-style header banners) */}
+        <div className="relative rounded-3xl overflow-hidden shadow-lg w-full aspect-[2.2/1] sm:aspect-[3/1] md:aspect-[3.5/1] transition-all duration-500 bg-brand-cream">
+          {promotionalBanners.map((banner, index) => (
+            <div
+              key={banner.image}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                index === activeBanner ? "opacity-100 z-10" : "opacity-0 z-0"
+              }`}
             >
-              <Calendar className="h-4 w-4 shrink-0" />
-              <span>Book Now</span>
-            </Link>
-            
-            <Link
-              href="/services"
-              className="w-full sm:w-auto bg-brand-cream/90 text-brand-plum hover:text-brand-cream border border-brand-rosegold px-8 py-3.5 rounded-full font-sans text-xs tracking-wider uppercase font-bold hover:bg-brand-plum hover:border-brand-plum shadow-md transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
-            >
-              <span>Explore Our Services</span>
-              <ArrowRight className="h-4 w-4 shrink-0" />
-            </Link>
+              {/* Background Image */}
+              <img
+                src={banner.image}
+                alt={banner.title}
+                className="absolute inset-0 w-full h-full object-cover z-0"
+              />
+            </div>
+          ))}
+
+          {/* Dots Indicator */}
+          <div className="absolute bottom-4 left-6 sm:left-10 z-20 flex space-x-1.5">
+            {promotionalBanners.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveBanner(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  activeBanner === index ? "bg-white w-5" : "bg-white/40 hover:bg-white/60"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
+
+        {/* Celebrating Header */}
+        <div className="text-center py-2">
+          <div className="inline-flex items-center justify-center space-x-2 border-b border-brand-gold/20 pb-2">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-serif font-extrabold text-brand-plum">
+              What are you celebrating?
+            </h2>
+            <div className="relative h-10 md:h-12 w-52 md:w-64 overflow-hidden font-sans font-black text-brand-gold text-lg sm:text-xl md:text-2xl">
+              <div
+                className="transition-transform duration-500 ease-out h-full"
+                style={{ transform: `translateY(-${celebrationIndex * 100}%)` }}
+              >
+                {celebrations.map((txt) => (
+                  <div key={txt} className="h-full flex items-center justify-start pl-2 whitespace-nowrap">
+                    {txt}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Categories Banner Grid (Ebo Grid Spanning Layout) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {categories.map((cat, idx) => (
+            <div
+              key={cat.name}
+              onClick={() => onSelectCategory(cat.key)}
+              className={`${cat.span} ${cat.aspect} relative rounded-2xl overflow-hidden border border-brand-rosegold/10 hover:border-brand-gold/60 transition-all duration-300 shadow-sm hover:shadow-xl cursor-pointer group shrink-0 bg-white`}
+              data-aos="fade-up"
+              data-aos-delay={(idx % 4) * 100}
+            >
+              <img
+                src={cat.image}
+                alt={cat.name}
+                className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                loading="lazy"
+              />
+              {/* Soft overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-plum/70 via-brand-plum/10 to-transparent flex flex-col justify-end p-4">
+                <div className="text-left text-white space-y-0.5">
+                  <p className="text-[11px] sm:text-xs font-sans tracking-widest font-black uppercase text-brand-gold">
+                    Explore
+                  </p>
+                  <h3 className="text-sm sm:text-base font-serif font-extrabold leading-tight text-white group-hover:text-brand-gold transition-colors">
+                    {cat.name}
+                  </h3>
+                </div>
+                <div className="absolute right-4 bottom-4 w-7 h-7 rounded-full bg-brand-cream/10 border border-white/20 flex items-center justify-center text-white group-hover:bg-brand-gold group-hover:text-brand-plum transition-all duration-300 shadow-md">
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
       </div>
     </section>
   );

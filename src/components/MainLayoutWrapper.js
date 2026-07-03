@@ -28,7 +28,7 @@ export default function MainLayoutWrapper({ children }) {
       />
       
       {/* Account for header height and bottom mobile navigation height */}
-      <main className="flex-grow pt-40 md:pt-28 pb-16 md:pb-0">
+      <main className="flex-grow pt-44 md:pt-28 pb-16 md:pb-0">
         {children}
       </main>
 

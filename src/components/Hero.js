@@ -109,18 +109,18 @@ export default function Hero({ onSelectCategory = () => {} }) {
         </div>
 
         {/* Celebrating Header */}
-        <div className="text-center py-2">
-          <div className="inline-flex items-center justify-center space-x-2 border-b border-brand-gold/20 pb-2">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-serif font-extrabold text-brand-plum">
+        <div className="text-center py-2 max-w-sm mx-auto sm:max-w-none">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 border-b border-brand-gold/20 pb-3 md:pb-2">
+            <h2 className="text-base sm:text-xl md:text-2xl font-serif font-extrabold text-brand-plum">
               What are you celebrating?
             </h2>
-            <div className="relative h-10 md:h-12 w-52 md:w-64 overflow-hidden font-sans font-black text-brand-gold text-lg sm:text-xl md:text-2xl">
+            <div className="relative h-9 md:h-12 w-52 md:w-64 overflow-hidden font-sans font-black text-brand-gold text-base sm:text-xl md:text-2xl">
               <div
                 className="transition-transform duration-500 ease-out h-full"
                 style={{ transform: `translateY(-${celebrationIndex * 100}%)` }}
               >
                 {celebrations.map((txt) => (
-                  <div key={txt} className="h-full flex items-center justify-start pl-2 whitespace-nowrap">
+                  <div key={txt} className="h-full flex items-center justify-center md:justify-start pl-0 md:pl-2 whitespace-nowrap">
                     {txt}
                   </div>
                 ))}

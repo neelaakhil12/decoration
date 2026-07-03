@@ -79,7 +79,7 @@ export default function Navbar({
               <img
                 src="/logo.png"
                 alt="Decor Dazzlers Logo"
-                className="h-16 w-auto object-contain"
+                className="h-20 w-auto object-contain"
               />
             </Link>
 

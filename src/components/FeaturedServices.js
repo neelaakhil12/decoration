@@ -322,9 +322,8 @@ export default function FeaturedServices({
                       href={getWhatsAppLink(prod)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full bg-brand-plum hover:bg-gold-gradient text-brand-cream hover:text-brand-plum border border-brand-plum hover:border-brand-gold py-2.5 rounded-xl text-xs font-sans font-bold tracking-wider uppercase transition-all duration-300 flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm hover:shadow-md"
+                      className="w-full bg-brand-plum hover:bg-gold-gradient text-brand-cream hover:text-brand-plum border border-brand-plum hover:border-brand-gold py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-sans font-bold tracking-wider uppercase transition-all duration-300 flex items-center justify-center cursor-pointer shadow-sm hover:shadow-md whitespace-nowrap"
                     >
-                      <MessageCircle className="h-4 w-4 shrink-0" />
                       <span>Enquire Now</span>
                     </a>
                   </div>

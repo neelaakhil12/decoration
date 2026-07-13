@@ -1,86 +1,109 @@
-import { Crown, Palette, Tag, Zap, Sliders } from "lucide-react";
+"use client";
+import { Zap, Calendar, Award, ShieldCheck, Heart } from "lucide-react";
 
 export default function WhyChooseUs() {
-  const items = [
+  const stats = [
+    { num: "10,000+", label: "Happy Customers" },
+    { num: "50,000+", label: "Orders Completed" },
+    { num: "5+", label: "Cities Served" },
+    { num: "4.9/5", label: "Average Rating" },
+  ];
+
+  const features = [
     {
-      title: "Creative Theme Designs",
-      description: "Our artists draft custom concepts and layouts, ensuring your celebration is completely unique and aesthetically magnificent.",
-      icon: Palette,
-      delay: 100,
-    },
-    {
-      title: "Affordable Packages",
-      description: "Get premium luxury styling that aligns perfectly with your budget. We offer transparent pricing structures without compromise.",
-      icon: Tag,
-      delay: 200,
-    },
-    {
-      title: "Fast Setup",
-      description: "Our dedicated on-field crew sets up layouts swiftly and meticulously, guaranteeing ready stages before guests arrive.",
+      title: "90-Min Express Setup",
+      desc: "Instant decoration options ready in as fast as 90 minutes from booking. Perfect for last-minute surprises.",
       icon: Zap,
-      delay: 300,
     },
     {
-      title: "Customized Decorations",
-      description: "Tailor every color shade, balloon setup, and floral pattern. We collaborate with you to paint your personal story in details.",
-      icon: Sliders,
-      delay: 400,
+      title: "Scheduled Bookings",
+      desc: "Plan ahead with ease. Book your decoration setup up to 90 days in advance.",
+      icon: Calendar,
     },
     {
-      title: "Premium Quality Service",
-      description: "We use top-grade fabrics, fresh luxury flowers, premium balloons, and safe structural supports for pristine visual impact.",
-      icon: Crown,
-      delay: 500,
+      title: "Verified Decorators",
+      desc: "All our on-field crew members are trained, background-verified professionals who deliver pristine work.",
+      icon: ShieldCheck,
+    },
+    {
+      title: "Transparent & Affordable",
+      desc: "Best quality setups at wholesale rates. What you see is what you pay—no hidden surprises.",
+      icon: Award,
     },
   ];
 
   return (
-    <section className="py-24 bg-brand-plum text-brand-cream relative overflow-hidden">
-      {/* Background patterns */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-brand-gold/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-brand-rosegold/5 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
-          <span className="text-xs uppercase tracking-widest font-sans font-bold text-brand-gold bg-brand-gold/10 px-4 py-1.5 rounded-full border border-brand-gold/20 inline-block mb-4">
-            Why Decor Dazzlers
-          </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-brand-cream leading-tight">
-            Crafting Celebrations <span className="text-gold-gradient italic">With Perfection</span>
-          </h2>
-          <p className="text-brand-pink/70 font-sans max-w-lg mx-auto mt-4 text-sm sm:text-base">
-            We are dedicated to bringing your dreams to life with quality resources, efficient planning, and creative elegance.
-          </p>
-        </div>
-
-        {/* Benefits Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {items.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.title}
-                className="bg-brand-cream/5 border border-brand-gold/15 p-6 rounded-2xl hover:bg-brand-cream/10 hover:border-brand-gold transition-all duration-300 transform hover:-translate-y-2 text-center flex flex-col items-center group shadow-sm hover:shadow-2xl"
-                data-aos="fade-up"
-                data-aos-delay={item.delay}
+    <section className="py-12 bg-white relative border-t border-gray-100 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        
+        {/* ── Stats Strip Row ── */}
+        <div 
+          className="rounded-3xl stats-strip text-white p-8 md:p-10 shadow-xl relative overflow-hidden"
+          data-aos="fade-up"
+          data-aos-duration="1000"
+        >
+          {/* Subtle decorative glow */}
+          <div className="absolute top-0 right-1/4 w-72 h-72 bg-brand-gold/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center divide-y lg:divide-y-0 lg:divide-x divide-white/10">
+            {stats.map((s, idx) => (
+              <div 
+                key={s.label} 
+                className={`space-y-1 ${idx > 1 ? "pt-6 lg:pt-0" : ""} ${idx === 1 ? "pt-6 lg:pt-0 border-t-0" : ""}`}
+                data-aos="zoom-in"
+                data-aos-delay={idx * 150}
               >
-                {/* Icon wrapper */}
-                <div className="bg-brand-gold/10 p-4 rounded-full border border-brand-gold/20 group-hover:bg-brand-gold/25 transition-all duration-300 mb-6">
-                  <Icon className="h-6 w-6 text-brand-gold group-hover:scale-110 transition-transform" />
+                <div className="text-3xl sm:text-4xl font-sans font-black text-brand-gold">
+                  {s.num}
                 </div>
-                {/* Title */}
-                <h3 className="text-lg font-serif font-bold text-brand-cream mb-3 tracking-wide">
-                  {item.title}
-                </h3>
-                {/* Description */}
-                <p className="text-brand-pink/70 text-xs font-sans leading-relaxed">
-                  {item.description}
+                <p className="text-xs sm:text-sm font-sans font-medium text-brand-pink/80">
+                  {s.label}
                 </p>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
+
+        {/* ── Core Value Propositions (Ebo style features) ── */}
+        <div className="space-y-6">
+          <div className="text-center max-w-xl mx-auto space-y-2" data-aos="fade-up">
+            <div className="section-badge">
+              <Heart className="h-3.5 w-3.5 text-brand-gold fill-brand-gold" />
+              Decor Dazzlers Trust
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-serif font-black text-brand-plum leading-tight">
+              Why Choose Our <span className="text-gold-gradient italic">Decoration Service?</span>
+            </h2>
+            <p className="text-brand-plum/60 font-sans text-xs sm:text-sm">
+              We make booking decorations as easy as ordering food online.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
+            {features.map((feat, idx) => {
+              const Icon = feat.icon;
+              return (
+                <div
+                  key={feat.title}
+                  className="bg-gray-50 border border-gray-100 hover:border-brand-gold/40 p-6 rounded-2xl transition-all duration-300 flex flex-col items-center text-center shadow-sm hover:shadow-md group"
+                  data-aos="fade-up"
+                  data-aos-delay={idx * 100}
+                >
+                  <div className="bg-brand-gold/10 p-3 rounded-xl mb-4 group-hover:bg-brand-gold/20 transition-all">
+                    <Icon className="h-6 w-6 text-brand-gold" />
+                  </div>
+                  <h3 className="text-sm font-sans font-black text-brand-plum mb-2">
+                    {feat.title}
+                  </h3>
+                  <p className="text-xs font-sans text-brand-plum/65 leading-relaxed">
+                    {feat.desc}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
       </div>
     </section>
   );

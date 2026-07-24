@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Lock, ShieldCheck, CheckCircle, ArrowRight, AlertCircle, KeyRound } from "lucide-react";
+import { Lock, ShieldCheck, CheckCircle, ArrowRight, AlertCircle, KeyRound, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 function ResetPasswordForm() {
@@ -13,6 +13,8 @@ function ResetPasswordForm() {
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -118,13 +120,21 @@ function ResetPasswordForm() {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
-                  type="password"
+                  type={showNewPassword ? "text" : "password"}
                   required
                   placeholder="Enter new password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-brand-gold pl-11 pr-4 py-3 rounded-xl text-sm text-brand-plum font-sans focus:outline-none focus:ring-2 focus:ring-brand-gold/20"
+                  className="w-full bg-gray-50 border border-gray-200 focus:border-brand-gold pl-11 pr-11 py-3 rounded-xl text-sm text-brand-plum font-sans focus:outline-none focus:ring-2 focus:ring-brand-gold/20"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-plum transition-colors cursor-pointer p-1"
+                  title={showNewPassword ? "Hide password" : "Show password"}
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4 text-brand-gold" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 
@@ -135,13 +145,21 @@ function ResetPasswordForm() {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   required
                   placeholder="Re-enter new password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-brand-gold pl-11 pr-4 py-3 rounded-xl text-sm text-brand-plum font-sans focus:outline-none focus:ring-2 focus:ring-brand-gold/20"
+                  className="w-full bg-gray-50 border border-gray-200 focus:border-brand-gold pl-11 pr-11 py-3 rounded-xl text-sm text-brand-plum font-sans focus:outline-none focus:ring-2 focus:ring-brand-gold/20"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-plum transition-colors cursor-pointer p-1"
+                  title={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4 text-brand-gold" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 

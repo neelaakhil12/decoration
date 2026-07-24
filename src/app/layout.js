@@ -12,6 +12,11 @@ export const metadata = {
   title: "Decor Dazzlers | Premium Luxury Event Decorations",
   description: "Transforming celebrations into magical memories. We design luxury decorations for weddings, birthdays, baby showers, naming ceremonies, stage events, corporate showrooms, festivals, and other special occasions.",
   keywords: "luxury decoration, event decorator, stage decoration, baby shower decor, birthday party decor, festival decorations, naming ceremony, house warming decoration",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }) {

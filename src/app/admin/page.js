@@ -5,7 +5,8 @@ import Link from "next/link";
 import { 
   Plus, Trash2, Edit3, Upload, Film, Image as ImageIcon, 
   LogOut, Sparkles, Layers, RefreshCw, X, ExternalLink,
-  Search, ShieldCheck, Menu, Filter, Check, LayoutGrid, Sliders
+  Search, ShieldCheck, Menu, Filter, Check, LayoutGrid, Sliders,
+  Phone, Mail, MessageSquare, MapPin, Calendar, Clock, CheckCircle2, AlertCircle
 } from "lucide-react";
 import { useApp } from "@/components/AppContext";
 
@@ -17,10 +18,12 @@ export default function AdminDashboardPage() {
     heroSliders, addHeroSlider, updateHeroSlider, deleteHeroSlider,
     subCategories: appSubCategories, addSubCategory, deleteSubCategory,
     categoryPosters, addCategoryPoster, updateCategoryPoster, deleteCategoryPoster,
+    bookings, updateBookingStatus, deleteBooking,
     reloadFromSupabase 
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState("services"); // "services" | "sliders" | "gallery" | "categories"
+  const [activeTab, setActiveTab] = useState("services"); // "services" | "sliders" | "gallery" | "categories" | "bookings"
+  const [bookingFilterStatus, setBookingFilterStatus] = useState("All");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminEmail, setAdminEmail] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -367,6 +370,32 @@ export default function AdminDashboardPage() {
                 activeTab === "categories" ? "bg-brand-plum text-brand-gold" : "bg-white/10 text-white"
               }`}>
                 {(categoryPosters || []).length}
+              </span>
+            </button>
+
+            <div className="text-[10px] uppercase font-extrabold tracking-widest text-brand-pink/50 px-3 pt-2 mb-1">
+              Section 5: Customer Orders
+            </div>
+
+            <button
+              onClick={() => {
+                setActiveTab("bookings");
+                setMobileSidebarOpen(false);
+              }}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                activeTab === "bookings"
+                  ? "bg-brand-gold text-brand-plum shadow-lg font-black scale-102"
+                  : "bg-white/5 text-white/80 hover:bg-white/15 hover:text-white"
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <MessageSquare className="h-4 w-4 text-emerald-400" />
+                <span>Booking Inquiries</span>
+              </div>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                activeTab === "bookings" ? "bg-brand-plum text-brand-gold" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+              }`}>
+                {(bookings || []).length}
               </span>
             </button>
           </div>
@@ -850,6 +879,219 @@ export default function AdminDashboardPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* SECTION 5: CUSTOMER BOOKINGS & INQUIRIES */}
+          {activeTab === "bookings" && (
+            <div className="space-y-6 font-sans">
+              
+              {/* Header & Status Filters */}
+              <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-serif font-black text-brand-plum flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-emerald-600" />
+                    <span>Customer Booking Inquiries</span>
+                  </h3>
+                  <p className="text-xs text-gray-500 font-sans mt-0.5">
+                    Real-time inquiries submitted by users from the "Book Now" website modal.
+                  </p>
+                </div>
+
+                <div className="flex items-center space-x-2 bg-gray-100 p-1.5 rounded-2xl">
+                  {["All", "New", "Contacted", "Completed"].map((st) => (
+                    <button
+                      key={st}
+                      onClick={() => setBookingFilterStatus(st)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        bookingFilterStatus === st
+                          ? "bg-brand-plum text-white shadow-md font-extrabold"
+                          : "text-gray-600 hover:text-brand-plum"
+                      }`}
+                    >
+                      {st} {st === "All" ? `(${(bookings || []).length})` : `(${(bookings || []).filter(b => (b.status || "New") === st).length})`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Bookings List / Cards */}
+              {(() => {
+                const filteredBookings = (bookings || []).filter(b => {
+                  if (bookingFilterStatus === "All") return true;
+                  return (b.status || "New") === bookingFilterStatus;
+                });
+
+                if (filteredBookings.length === 0) {
+                  return (
+                    <div className="bg-white p-12 text-center rounded-3xl border border-gray-200 space-y-3">
+                      <MessageSquare className="h-10 w-10 text-gray-300 mx-auto" />
+                      <h4 className="font-bold text-base text-gray-700">No Booking Inquiries Found</h4>
+                      <p className="text-xs text-gray-500">
+                        {bookingFilterStatus === "All"
+                          ? "No bookings have been submitted yet."
+                          : `No bookings found with status "${bookingFilterStatus}".`}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-4">
+                    {filteredBookings.map((b) => (
+                      <div
+                        key={b.id}
+                        className={`bg-white border rounded-3xl p-6 shadow-sm hover:shadow-md transition-all space-y-4 relative overflow-hidden ${
+                          (b.status || "New") === "New"
+                            ? "border-emerald-300 ring-2 ring-emerald-500/10"
+                            : "border-gray-200"
+                        }`}
+                      >
+                        {/* Card Top Banner */}
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
+                          <div className="flex items-center space-x-3">
+                            <span className="bg-brand-plum text-white font-mono text-xs font-bold px-3 py-1 rounded-xl">
+                              ID: {b.id}
+                            </span>
+                            <span className="text-xs text-gray-400 font-mono flex items-center gap-1">
+                              <Clock className="h-3.5 w-3.5" />
+                              {b.created_at ? new Date(b.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "Recently"}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs font-bold text-gray-500">Status:</span>
+                            <select
+                              value={b.status || "New"}
+                              onChange={(e) => updateBookingStatus(b.id, e.target.value)}
+                              className={`text-xs font-black px-3 py-1.5 rounded-xl border focus:outline-none cursor-pointer ${
+                                (b.status || "New") === "New"
+                                  ? "bg-emerald-100 border-emerald-300 text-emerald-800"
+                                  : (b.status || "New") === "Contacted"
+                                  ? "bg-blue-100 border-blue-300 text-blue-800"
+                                  : "bg-gray-100 border-gray-300 text-gray-700"
+                              }`}
+                            >
+                              <option value="New">🟢 New Inquiry</option>
+                              <option value="Contacted">🔵 Contacted</option>
+                              <option value="Completed">✅ Completed</option>
+                            </select>
+
+                            <button
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete inquiry from ${b.name}?`)) {
+                                  deleteBooking(b.id);
+                                }
+                              }}
+                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                              title="Delete Booking"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Customer & Booking Details Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          
+                          {/* Col 1: Customer Contact Info */}
+                          <div className="space-y-2 bg-gray-50/80 p-4 rounded-2xl border border-gray-100">
+                            <p className="text-[10px] font-black uppercase text-brand-plum tracking-wider">Customer Details</p>
+                            <h4 className="font-bold text-base text-brand-plum">{b.name}</h4>
+                            
+                            <div className="flex items-center space-x-2 text-xs font-bold text-gray-700">
+                              <Phone className="h-3.5 w-3.5 text-brand-gold" />
+                              <a href={`tel:${b.phone}`} className="hover:underline text-brand-plum">{b.phone}</a>
+                            </div>
+
+                            {b.email && (
+                              <div className="flex items-center space-x-2 text-xs text-gray-600 truncate">
+                                <Mail className="h-3.5 w-3.5 text-brand-gold" />
+                                <a href={`mailto:${b.email}`} className="hover:underline truncate">{b.email}</a>
+                              </div>
+                            )}
+
+                            <div className="pt-2 flex items-center space-x-2">
+                              <a
+                                href={`https://wa.me/91${b.phone.replace(/\D/g, '')}?text=Hello%20${encodeURIComponent(b.name)},%20regarding%20your%20Decor%20Dazzlers%20booking%20inquiry...`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 shadow-sm transition-all"
+                              >
+                                <MessageSquare className="h-3.5 w-3.5" />
+                                <span>WhatsApp Chat</span>
+                              </a>
+                              <a
+                                href={`tel:${b.phone}`}
+                                className="bg-brand-plum hover:bg-brand-plum/90 text-white p-2 rounded-xl text-xs font-bold flex items-center justify-center transition-all"
+                                title="Call Customer"
+                              >
+                                <Phone className="h-3.5 w-3.5" />
+                              </a>
+                            </div>
+                          </div>
+
+                          {/* Col 2: Decoration Requirement */}
+                          <div className="space-y-2 bg-gray-50/80 p-4 rounded-2xl border border-gray-100">
+                            <p className="text-[10px] font-black uppercase text-brand-plum tracking-wider">Decoration Requirements</p>
+                            
+                            <div>
+                              <span className="text-xs text-gray-400 block">Category:</span>
+                              <span className="font-bold text-sm text-brand-plum bg-brand-gold/20 text-brand-plum px-3 py-1 rounded-lg inline-block mt-0.5">
+                                {b.requirement || "General Inquiry"}
+                              </span>
+                            </div>
+
+                            {b.selectedTheme && b.selectedTheme !== "General Inquiry" && (
+                              <div className="pt-1">
+                                <span className="text-xs text-gray-400 block">Selected Package:</span>
+                                <span className="font-bold text-xs text-brand-plum font-serif">
+                                  {b.selectedTheme}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Col 3: Address & Location Link */}
+                          <div className="space-y-2 bg-gray-50/80 p-4 rounded-2xl border border-gray-100">
+                            <p className="text-[10px] font-black uppercase text-brand-plum tracking-wider">Location & Notes</p>
+
+                            {b.address && (
+                              <div className="text-xs text-gray-700 leading-relaxed">
+                                <strong className="text-brand-plum block mb-0.5">Address:</strong>
+                                {b.address}
+                              </div>
+                            )}
+
+                            {b.locationLink && (
+                              <div className="pt-1">
+                                <a
+                                  href={b.locationLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center space-x-1.5 text-xs font-bold text-blue-600 hover:underline bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-200"
+                                >
+                                  <MapPin className="h-3.5 w-3.5 text-red-500" />
+                                  <span>Open Google Maps Link 📍</span>
+                                </a>
+                              </div>
+                            )}
+
+                            {b.customNotes && (
+                              <div className="pt-2 text-xs text-gray-600 bg-white p-2.5 rounded-xl border border-gray-200 font-mono">
+                                <strong className="text-brand-plum block font-sans text-[10px] uppercase">Notes:</strong>
+                                {b.customNotes}
+                              </div>
+                            )}
+                          </div>
+
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
             </div>
           )}
 

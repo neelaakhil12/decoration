@@ -17,7 +17,7 @@ const DECORATION_REQUIREMENTS = [
 ];
 
 export default function BookingModal() {
-  const { isBookingOpen, closeBookingModal, bookingItem } = useApp();
+  const { isBookingOpen, closeBookingModal, bookingItem, addBooking } = useApp();
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -97,27 +97,41 @@ export default function BookingModal() {
       return;
     }
 
-    // Construct neat WhatsApp Message
-    let messageText = `✨ *DECOR DAZZLERS - BOOKING INQUIRY* ✨\n`;
+    // Save booking details to Admin Panel
+    if (addBooking) {
+      addBooking({
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        requirement: selectedRequirement,
+        selectedTheme: selectedThemeTitle || "General Inquiry",
+        address: address.trim(),
+        locationLink: locationLink.trim(),
+        customNotes: customNotes.trim(),
+      });
+    }
+
+    // Construct clean WhatsApp Message (no asterisks or special unicode symbols that fail on desktop)
+    let messageText = `DECOR DAZZLERS - BOOKING INQUIRY\n`;
     messageText += `----------------------------------------\n`;
-    messageText += `👤 *Name:* ${name.trim()}\n`;
-    messageText += `📞 *Phone:* ${phone.trim()}\n`;
-    if (email.trim()) messageText += `📧 *Email:* ${email.trim()}\n`;
-    messageText += `🎉 *Decoration Requirement:* ${selectedRequirement}\n`;
+    messageText += `Name: ${name.trim()}\n`;
+    messageText += `Phone: ${phone.trim()}\n`;
+    if (email.trim()) messageText += `Email: ${email.trim()}\n`;
+    messageText += `Decoration Requirement: ${selectedRequirement}\n`;
     if (selectedThemeTitle) {
-      messageText += `🌸 *Selected Theme:* ${selectedThemeTitle}\n`;
+      messageText += `Selected Theme: ${selectedThemeTitle}\n`;
     }
     if (address.trim()) {
-      messageText += `📍 *Address:* ${address.trim()}\n`;
+      messageText += `Address: ${address.trim()}\n`;
     }
     if (locationLink.trim()) {
-      messageText += `🗺️ *Location Link:* ${locationLink.trim()}\n`;
+      messageText += `Location Link: ${locationLink.trim()}\n`;
     }
     if (customNotes.trim()) {
-      messageText += `📝 *Other/Custom Requirements:* ${customNotes.trim()}\n`;
+      messageText += `Other / Custom Requirements: ${customNotes.trim()}\n`;
     }
     messageText += `----------------------------------------\n`;
-    messageText += `Sent from Decor Dazzlers Website`;
+    messageText += `Sent via Decor Dazzlers Website`;
 
     const whatsappUrl = `https://wa.me/919848677418?text=${encodeURIComponent(messageText)}`;
     

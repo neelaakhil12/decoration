@@ -146,6 +146,7 @@ export function AppProvider({ children }) {
   const [galleryItems, setGalleryItems] = useState(defaultGalleryItems);
   const [heroSliders, setHeroSliders] = useState(defaultHeroSliders);
   const [categoryPosters, setCategoryPosters] = useState(defaultCategoryPosters);
+  const [bookings, setBookings] = useState([]);
 
   const defaultSubCategories = ["Wall Decor", "Ring Stand", "Room Decor", "Stage Backdrop", "Table/Car Decor"];
   const [subCategories, setSubCategories] = useState(defaultSubCategories);
@@ -180,6 +181,11 @@ export function AppProvider({ children }) {
         const parsed = JSON.parse(savedCategoryPosters);
         if (parsed && parsed.length > 0) setCategoryPosters(parsed);
       }
+      const savedBookings = localStorage.getItem("decor_booking_inquiries");
+      if (savedBookings) {
+        const parsed = JSON.parse(savedBookings);
+        if (parsed && parsed.length > 0) setBookings(parsed);
+      }
     } catch (e) {
       console.error("Error reading localStorage on mount:", e);
     }
@@ -199,6 +205,9 @@ export function AppProvider({ children }) {
       }
       if (e.key === "decor_category_posters" && e.newValue) {
         try { setCategoryPosters(JSON.parse(e.newValue)); } catch (err) {}
+      }
+      if (e.key === "decor_booking_inquiries" && e.newValue) {
+        try { setBookings(JSON.parse(e.newValue)); } catch (err) {}
       }
     };
     window.addEventListener("storage", handleStorageChange);
@@ -256,6 +265,17 @@ export function AppProvider({ children }) {
       if (!catError && dbCategories && dbCategories.length > 0) {
         setCategoryPosters(dbCategories);
         saveToLocal("decor_category_posters", dbCategories);
+      }
+
+      // 5. Fetch Bookings
+      const { data: dbBookings, error: bkError } = await supabase
+        .from("bookings")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!bkError && dbBookings && dbBookings.length > 0) {
+        setBookings(dbBookings);
+        saveToLocal("decor_booking_inquiries", dbBookings);
       }
     } catch (err) {
       console.warn("Supabase load fallback triggered:", err);
@@ -477,6 +497,68 @@ export function AppProvider({ children }) {
     }
   };
 
+  // BOOKING INQUIRIES CRUD
+  const addBooking = async (newBooking) => {
+    const bookingObj = {
+      id: "BK" + Date.now().toString().slice(-6),
+      status: "New",
+      ...newBooking,
+      created_at: new Date().toISOString(),
+    };
+
+    setBookings((prev) => {
+      const updated = [bookingObj, ...prev];
+      saveToLocal("decor_booking_inquiries", updated);
+      return updated;
+    });
+
+    try {
+      await supabase.from("bookings").insert([{
+        id: bookingObj.id,
+        name: bookingObj.name,
+        phone: bookingObj.phone,
+        email: bookingObj.email || "",
+        requirement: bookingObj.requirement || "",
+        selected_theme: bookingObj.selectedTheme || "",
+        address: bookingObj.address || "",
+        location_link: bookingObj.locationLink || "",
+        custom_notes: bookingObj.customNotes || "",
+        status: bookingObj.status,
+        created_at: bookingObj.created_at,
+      }]);
+    } catch (e) {
+      console.error("Supabase booking insert error:", e);
+    }
+  };
+
+  const updateBookingStatus = async (id, status) => {
+    setBookings((prev) => {
+      const updated = prev.map((item) => (item.id === id ? { ...item, status } : item));
+      saveToLocal("decor_booking_inquiries", updated);
+      return updated;
+    });
+
+    try {
+      await supabase.from("bookings").update({ status }).eq("id", id);
+    } catch (e) {
+      console.error("Supabase booking status update error:", e);
+    }
+  };
+
+  const deleteBooking = async (id) => {
+    setBookings((prev) => {
+      const updated = prev.filter((item) => item.id !== id);
+      saveToLocal("decor_booking_inquiries", updated);
+      return updated;
+    });
+
+    try {
+      await supabase.from("bookings").delete().eq("id", id);
+    } catch (e) {
+      console.error("Supabase booking delete error:", e);
+    }
+  };
+
   // Subcategories CRUD
   const addSubCategory = (newSubCat) => {
     if (!newSubCat || !newSubCat.trim()) return;
@@ -585,6 +667,10 @@ export function AppProvider({ children }) {
         addCategoryPoster,
         updateCategoryPoster,
         deleteCategoryPoster,
+        bookings,
+        addBooking,
+        updateBookingStatus,
+        deleteBooking,
         reloadFromSupabase: loadSupabaseData,
       }}
     >

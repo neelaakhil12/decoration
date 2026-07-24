@@ -2,8 +2,10 @@
 import { useState, useEffect } from "react";
 import { Zap, Calendar, Star, CheckCircle, MapPin, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { useApp } from "@/components/AppContext";
 
 export default function Hero({ onSelectCategory = () => {} }) {
+  const { heroSliders, openBookingModal, categoryPosters: appCategoryPosters } = useApp();
   const [celebrationIndex, setCelebrationIndex] = useState(0);
   const [activeBanner, setActiveBanner] = useState(0);
   const [activeCatChip, setActiveCatChip] = useState(0);
@@ -17,36 +19,26 @@ export default function Hero({ onSelectCategory = () => {} }) {
     "Festival Decor 🪔",
   ];
 
-  const promotionalBanners = [
+  const promotionalBanners = heroSliders && heroSliders.length > 0 ? heroSliders : [
     {
       title: "15% OFF First Order",
       gradient: "linear-gradient(135deg, #5C2E46 0%, #8A4F6E 100%)",
       tag: "Limited Offer",
-    },
-    {
-      title: "Same Day Setup in 90 Mins",
-      gradient: "linear-gradient(135deg, #C89B3C 0%, #D4A64A 100%)",
-      tag: "Express Setup",
-    },
-    {
-      title: "Custom Dream Themes",
-      gradient: "linear-gradient(135deg, #D89AA0 0%, #5C2E46 100%)",
-      tag: "Bespoke Art",
+      subtitle: "Decor Dazzlers · Hyderabad — Same day setup available"
     },
   ];
 
-  // Category posters grid — EboNow-style 4-col grid
-  const categoryPosters = [
-    { name: "Birthday Decor", key: "Birthday", image: "/images/birthday_decor.png", span: "col-span-2", aspect: "2/1" },
-    { name: "Baby Welcome", key: "Baby Shower", image: "/images/welcome_baby_decor.png", span: "col-span-2", aspect: "2/1" },
-    { name: "Kid's Party", key: "Birthday", image: "/images/kids_birthday_decor.png", span: "col-span-1", aspect: "1/1" },
-    { name: "Anniversary", key: "Romantic", image: "/images/anniversary_decor.png", span: "col-span-1", aspect: "1/1" },
+  const categoryPosters = appCategoryPosters && appCategoryPosters.length > 0 ? appCategoryPosters : [
+    { name: "Birthday Decor", key: "Birthdays", image: "/images/birthday_decor.png", span: "col-span-2", aspect: "2/1" },
+    { name: "Baby Welcome", key: "Baby Welcome", image: "/images/welcome_baby_decor.png", span: "col-span-2", aspect: "2/1" },
+    { name: "Kid's Party", key: "Kid's Party", image: "/images/kids_birthday_decor.png", span: "col-span-1", aspect: "1/1" },
+    { name: "Anniversary", key: "Anniversary", image: "/images/anniversary_decor.png", span: "col-span-1", aspect: "1/1" },
     { name: "Baby Shower", key: "Baby Shower", image: "/images/baby_shower_decor.png", span: "col-span-1", aspect: "1/1" },
-    { name: "Stage & Wedding", key: "Stage & Wedding", image: "/images/stage_decor.png", span: "col-span-1", aspect: "1/1" },
-    { name: "House Warming", key: "Traditional", image: "/images/house_warming_decor.png", span: "col-span-1", aspect: "1/1" },
-    { name: "Festival Decor", key: "Traditional", image: "/images/festival_decor.png", span: "col-span-1", aspect: "1/1" },
-    { name: "Car Decor", key: "Specialty", image: "/images/car_decor.png", span: "col-span-1", aspect: "1/1" },
-    { name: "Something Else", key: "Specialty", image: "/images/pet_decor.png", span: "col-span-1", aspect: "1/1" },
+    { name: "Stage & Wedding", key: "Stages & Weddings", image: "/images/stage_decor.png", span: "col-span-1", aspect: "1/1" },
+    { name: "House Warming", key: "House Warming", image: "/images/house_warming_decor.png", span: "col-span-1", aspect: "1/1" },
+    { name: "Festival Decor", key: "Festive & Car", image: "/images/festival_decor.png", span: "col-span-1", aspect: "1/1" },
+    { name: "Car Decor", key: "Festive & Car", image: "/images/car_decor.png", span: "col-span-1", aspect: "1/1" },
+    { name: "Something Else", key: "All", image: "/images/pet_decor.png", span: "col-span-1", aspect: "1/1" },
   ];
 
   // Category chips (Explore at a glance)
@@ -91,12 +83,10 @@ export default function Hero({ onSelectCategory = () => {} }) {
           className="relative w-full overflow-hidden"
           style={{
             background: promotionalBanners[activeBanner].gradient,
-            minHeight: 220,
+            minHeight: 240,
           }}
-          data-aos="fade-down"
-          data-aos-duration="1000"
         >
-          <div className="max-w-7xl mx-auto px-8 lg:px-16 h-full flex flex-col justify-end py-10">
+          <div className="max-w-7xl mx-auto px-8 lg:px-16 h-full flex flex-col justify-center py-8">
             <span className="text-white/60 text-[11px] uppercase tracking-widest font-bold font-sans mb-2">
               {promotionalBanners[activeBanner].tag}
             </span>
@@ -104,7 +94,7 @@ export default function Hero({ onSelectCategory = () => {} }) {
               {promotionalBanners[activeBanner].title}
             </div>
             <div className="text-white/70 text-sm font-sans mt-2">
-              Decor Dazzlers · Hyderabad — Same day setup available
+              {promotionalBanners[activeBanner]?.subtitle || "Decor Dazzlers · Hyderabad — Same day setup available"}
             </div>
           </div>
 
@@ -253,7 +243,7 @@ function PhoneAppUI({
             {promotionalBanners[activeBanner].title}
           </div>
           <div className="text-white/80 text-[10px] font-sans mt-1">
-            Decor Dazzlers · Hyderabad
+            {promotionalBanners[activeBanner]?.subtitle || "Decor Dazzlers · Hyderabad"}
           </div>
         </div>
 
@@ -294,14 +284,11 @@ function PhoneAppUI({
       </div>
 
       {/* ── "What are you celebrating?" text ── */}
-      <div className="flex items-center gap-1 px-3 py-2 flex-shrink-0 border-b border-gray-100">
-        <span className="font-semibold text-brand-plum font-sans text-sm">
+      <div className="flex items-center justify-between gap-1.5 px-3 py-2.5 flex-shrink-0 border-b border-gray-100 bg-gray-50/50">
+        <span className="font-semibold text-brand-plum font-sans text-xs sm:text-sm whitespace-nowrap">
           What are you celebrating?
         </span>
-        <div
-          className="relative overflow-hidden font-black text-brand-gold font-sans text-sm h-6"
-          style={{ width: 120 }}
-        >
+        <div className="relative overflow-hidden font-black text-brand-gold font-sans text-xs sm:text-sm h-6 flex-1 min-w-0 max-w-[170px]">
           <div
             className="transition-transform duration-500 ease-out"
             style={{ transform: `translateY(-${celebrationIndex * 24}px)` }}
@@ -309,7 +296,7 @@ function PhoneAppUI({
             {celebrations.map((txt) => (
               <div
                 key={txt}
-                className="flex items-center pl-1"
+                className="flex items-center pl-1 text-xs sm:text-sm font-black tracking-tight whitespace-nowrap truncate"
                 style={{ height: 24 }}
               >
                 {txt}
@@ -450,17 +437,15 @@ function PhoneAppUI({
                 <div className="font-black text-brand-gold font-sans text-[11px]">
                   ₹{prod.price.toLocaleString()}
                 </div>
-                <a
-                  href={`https://wa.me/917075555987?text=I'm interested in ${prod.title}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full text-center text-white font-bold rounded-lg py-1 mt-1 transition-all text-[9px]"
+                <button
+                  onClick={() => openBookingModal(prod)}
+                  className="w-full text-center text-white font-bold rounded-lg py-1 mt-1 transition-all text-[9px] cursor-pointer"
                   style={{
                     background: "linear-gradient(135deg, #5C2E46, #8A4F6E)",
                   }}
                 >
-                  Enquire Now
-                </a>
+                  Book Now
+                </button>
               </div>
             </div>
           ))}

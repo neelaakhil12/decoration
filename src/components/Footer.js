@@ -16,12 +16,15 @@ export default function Footer() {
           
           {/* Column 1: Brand Info */}
           <div className="space-y-4">
-            <Link href="/" className="inline-block group">
+            <Link href="/" className="inline-flex items-center gap-3 group">
               <img
                 src="/logo.png"
                 alt="Decor Dazzlers Logo"
-                className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                className="h-16 sm:h-20 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               />
+              <span className="font-serif font-black text-xl text-brand-plum group-hover:text-brand-gold transition-colors">
+                Decor Dazzlers
+              </span>
             </Link>
             <p className="text-brand-plum/70 text-xs font-sans leading-relaxed">
               Hyderabad's premium decoration booking platform. We turn normal venues into breathtaking premium celebration layouts, creating unforgettable memories for your family.
@@ -82,8 +85,8 @@ export default function Footer() {
             <ul className="space-y-3 font-sans text-xs text-brand-plum/80">
               <li className="flex items-start space-x-2">
                 <Phone className="h-4 w-4 text-brand-gold shrink-0 mt-0.5" />
-                <a href="tel:+917075555987" className="hover:text-brand-gold transition-colors">
-                  +91 70755 55987
+                <a href="tel:+919848677418" className="hover:text-brand-gold transition-colors">
+                  +91 98486 77418
                 </a>
               </li>
               <li className="flex items-start space-x-2">

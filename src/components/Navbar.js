@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { MapPin, Search, Phone, Menu, X, ChevronDown, User, ShoppingBag } from "lucide-react";
+import { MapPin, Search, Phone, Menu, X, ChevronDown, ShoppingBag } from "lucide-react";
 import { useApp } from "@/components/AppContext";
 
 export default function Navbar({
@@ -15,13 +15,13 @@ export default function Navbar({
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { setIsCartOpen } = useApp();
+  const { setIsCartOpen, openBookingModal } = useApp();
 
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Services", href: "/services" },
     { name: "About Us", href: "/about" },
-    { name: "Gallery", href: "/#gallery" },
+    { name: "Gallery", href: "/gallery" },
     { name: "Contact", href: "/contact" },
   ];
 
@@ -46,12 +46,15 @@ export default function Navbar({
 
             {/* Left: Logo */}
             <div className="flex items-center gap-4 flex-shrink-0">
-              <Link href="/" className="flex items-center gap-2 group">
+              <Link href="/" className="flex items-center gap-3.5 group">
                 <img
                   src="/logo.png"
                   alt="Decor Dazzlers Logo"
-                  className="h-26 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                  className="h-28 lg:h-30 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 />
+                <span className="font-serif font-black text-2xl lg:text-3xl text-brand-plum tracking-tight group-hover:text-brand-gold transition-colors font-sans whitespace-nowrap">
+                  Decor Dazzlers
+                </span>
               </Link>
             </div>
 
@@ -76,13 +79,17 @@ export default function Navbar({
               })}
             </div>
 
-            {/* Right: Location + Cart + Login + WhatsApp/Book */}
+            {/* Right: Location + Cart + WhatsApp/Book */}
             <div className="flex items-center gap-3 flex-shrink-0">
               {/* Location pill */}
-              <div className="flex items-center gap-1.5 bg-brand-cream border border-brand-gold/20 px-3 py-2 rounded-full">
+              <div 
+                onClick={onOpenLocationModal}
+                className="flex items-center gap-1.5 bg-brand-cream border border-brand-gold/20 px-3 py-2 rounded-full cursor-pointer hover:border-brand-gold hover:shadow-sm transition-all"
+                title="Click to pin or change location"
+              >
                 <MapPin className="h-3.5 w-3.5 text-brand-gold flex-shrink-0" />
                 <span className="text-[11px] font-bold text-brand-plum font-sans whitespace-nowrap">
-                  Hyderabad
+                  {location?.city || "Hyderabad"}
                 </span>
               </div>
 
@@ -99,22 +106,14 @@ export default function Navbar({
                 )}
               </div>
 
-              {/* User Login Button */}
-              <button className="flex items-center gap-1.5 border border-gray-200 hover:border-brand-gold hover:bg-brand-gold/5 px-3.5 py-2 rounded-full text-xs font-bold text-brand-plum transition-all">
-                <User className="h-4 w-4 text-brand-gold" />
-                <span>Login</span>
-              </button>
-
-              {/* Book on WhatsApp */}
-              <a
-                href="https://wa.me/917075555987?text=Hello%20Decor%20Dazzlers!%20I%20want%20to%20book%20a%20decoration%20service."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white hover:text-white px-4 py-2.5 rounded-full font-sans text-[11px] font-bold tracking-wide uppercase transition-all duration-300 shadow-sm hover:shadow-md"
+              {/* Book Button */}
+              <button
+                onClick={() => openBookingModal()}
+                className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white hover:text-white px-4 py-2.5 rounded-full font-sans text-[11px] font-bold tracking-wide uppercase transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer"
               >
                 <Phone className="h-3.5 w-3.5 flex-shrink-0" />
                 <span>Book Now</span>
-              </a>
+              </button>
             </div>
 
           </div>
@@ -142,25 +141,21 @@ export default function Navbar({
       {/* ─── MOBILE NAV ─── */}
       <div className="md:hidden">
         <div className="px-4 pt-3 pb-2.5 space-y-2.5">
-          {/* Row 1: Logo + location + Cart + Book */}
+          {/* Row 1: Logo + Cart + Book */}
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
               <img
                 src="/logo.png"
                 alt="Decor Dazzlers Logo"
-                className="h-14 w-auto object-contain"
+                className="h-18 sm:h-22 w-auto object-contain transition-all"
               />
+              <div className="flex flex-col font-serif font-black text-sm sm:text-base leading-tight text-brand-plum tracking-tight">
+                <span>Decor</span>
+                <span className="text-brand-gold">Dazzlers</span>
+              </div>
             </Link>
 
             <div className="flex items-center gap-2">
-              {/* Location - mobile */}
-              <div className="flex items-center gap-1 border border-gray-200 px-2.5 py-1.5 rounded-full">
-                <MapPin className="h-3 w-3 text-brand-gold flex-shrink-0" />
-                <span className="text-[10px] font-bold text-brand-plum font-sans">
-                  Hyderabad
-                </span>
-              </div>
-
               {/* Shopping Cart - mobile */}
               <div 
                 onClick={() => setIsCartOpen(true)}
@@ -174,18 +169,18 @@ export default function Navbar({
                 )}
               </div>
 
-              <a
-                href="/contact"
-                className="bg-brand-plum text-white px-3 py-1.5 rounded-full font-sans text-[10px] tracking-wider uppercase font-bold"
+              <button
+                onClick={() => openBookingModal()}
+                className="bg-brand-plum text-white px-3 py-1.5 rounded-full font-sans text-[10px] tracking-wider uppercase font-bold cursor-pointer"
               >
                 Book Now
-              </a>
+              </button>
             </div>
           </div>
 
-          {/* Row 2: Search bar + Login button */}
+          {/* Row 2: Search bar */}
           {pathname === "/" && (
-            <div className="flex gap-2 w-full">
+            <div className="w-full">
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-plum/35 pointer-events-none" />
                 <input
@@ -198,19 +193,21 @@ export default function Navbar({
                   autoComplete="off"
                 />
               </div>
-
-              {/* Login - mobile */}
-              <button className="flex-shrink-0 flex items-center justify-center gap-1 bg-brand-gold hover:bg-brand-plum text-brand-plum hover:text-white px-3 py-2.5 rounded-xl text-[11px] font-bold transition-all shadow-sm">
-                <User className="h-3.5 w-3.5" />
-                <span>Login</span>
-              </button>
             </div>
           )}
 
           {/* Row 3: Quick location info */}
-          <div className="flex items-center gap-1.5 text-[10px] text-brand-plum/60 font-sans pb-1 border-b border-gray-100">
-            <MapPin className="h-3 w-3 text-brand-gold flex-shrink-0" />
-            <span>Serving <strong className="text-brand-plum">Hyderabad</strong> · <strong className="text-brand-plum">Same Day Setup Available</strong></span>
+          <div 
+            onClick={onOpenLocationModal}
+            className="flex items-center justify-between text-[11px] text-brand-plum/70 font-sans py-1 border-b border-gray-100 cursor-pointer hover:bg-gray-50/80 rounded px-1 transition-all"
+            title="Click to pin or change location"
+          >
+            <div className="flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5 text-brand-gold flex-shrink-0" />
+              <span>
+                Serving <strong className="text-brand-plum font-bold underline decoration-brand-gold">{location?.address || location?.city || "Hyderabad"}</strong> · <strong className="text-brand-plum font-bold">Same Day Setup Available</strong>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -242,9 +239,9 @@ export default function Navbar({
                 Contact Us
               </p>
               <div className="space-y-2">
-                <a href="tel:+917075555987" className="flex items-center gap-2 text-sm font-sans text-brand-plum hover:text-brand-gold transition-colors">
+                <a href="tel:+919848677418" className="flex items-center gap-2 text-sm font-sans text-brand-plum hover:text-brand-gold transition-colors">
                   <Phone className="h-4 w-4 text-brand-gold" />
-                  +91 70755 55987
+                  +91 98486 77418
                 </a>
                 <p className="text-xs font-sans text-brand-plum/60">Hyderabad, Telangana</p>
               </div>

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Sparkles, Star, Heart, ChevronRight, ShoppingCart } from "lucide-react";
+import { useApp } from "@/components/AppContext";
 
 export default function FeaturedServices({
   searchQuery = "",
@@ -8,6 +9,7 @@ export default function FeaturedServices({
   onSelectCategory = () => {},
   onAddToCart = () => {},
 }) {
+  const { services: products, subCategories: appSubCategories, openBookingModal } = useApp();
   const [activeSubCategory, setActiveSubCategory] = useState("All");
   const [favorites, setFavorites] = useState({});
 
@@ -21,8 +23,7 @@ export default function FeaturedServices({
     { name: "Specialty", label: "Specialty", image: "/images/car_decor.png" },
   ];
 
-  const subCategories = [
-    "All",
+  const defaultSubCategories = [
     "Wall Decor",
     "Ring Stand",
     "Room Decor",
@@ -30,26 +31,50 @@ export default function FeaturedServices({
     "Table/Car Decor",
   ];
 
-  const products = [
-    { id: "CLA595", title: "Rosegold Chrome Arch Birthday Decor", category: "Birthday", subCategory: "Wall Decor", price: 3499, originalPrice: 4999, discount: "30% OFF", rating: 4.8, image: "/images/birthday_decor.png" },
-    { id: "CLA687", title: "Dreamy Pastel Floral Baby Shower", category: "Baby Shower", subCategory: "Room Decor", price: 5999, originalPrice: 7999, discount: "25% OFF", rating: 4.9, image: "/images/baby_shower_decor.png" },
-    { id: "CLA587", title: "Royal Red Rose Canopy Decor", category: "Romantic", subCategory: "Ring Stand", price: 4499, originalPrice: 5999, discount: "25% OFF", rating: 4.8, image: "/images/anniversary_decor.png" },
-    { id: "CLA612", title: "Whimsical Jungle Safari Kid's Birthday", category: "Birthday", subCategory: "Stage Backdrop", price: 7499, originalPrice: 9999, discount: "25% OFF", rating: 4.7, image: "/images/kids_birthday_decor.png" },
-    { id: "CLA714", title: "Traditional Mango Leaf Threshold Decor", category: "Traditional", subCategory: "Wall Decor", price: 2499, originalPrice: 3499, discount: "28% OFF", rating: 4.8, image: "/images/house_warming_decor.png" },
-    { id: "CLA729", title: "Surprise Bedroom Canopy Proposal Setup", category: "Romantic", subCategory: "Room Decor", price: 3999, originalPrice: 5499, discount: "27% OFF", rating: 4.9, image: "/images/anniversary_decor.png" },
-    { id: "CLA803", title: "Showroom Grand Opening Balloon Arch", category: "Stage & Wedding", subCategory: "Stage Backdrop", price: 4999, originalPrice: 6999, discount: "28% OFF", rating: 4.6, image: "/images/stage_decor.png" },
-    { id: "CLA850", title: "Luxury Orchid Car Bonnet Decoration", category: "Specialty", subCategory: "Table/Car Decor", price: 2999, originalPrice: 3999, discount: "25% OFF", rating: 4.7, image: "/images/car_decor.png" },
-    { id: "CLA899", title: "Premium Golden Marigold Garland Stage", category: "Stage & Wedding", subCategory: "Stage Backdrop", price: 12999, originalPrice: 16999, discount: "23% OFF", rating: 4.9, image: "/images/stage_decor.png" },
-    { id: "CLA910", title: "Cute Pet-Friendly Paw Birthday Decor", category: "Specialty", subCategory: "Wall Decor", price: 1999, originalPrice: 2999, discount: "33% OFF", rating: 4.8, image: "/images/pet_decor.png" },
-    { id: "CLA942", title: "Sparkling Golden Lights Festival Decor", category: "Traditional", subCategory: "Room Decor", price: 3499, originalPrice: 4999, discount: "30% OFF", rating: 4.7, image: "/images/festival_decor.png" },
-  ];
+  const dynamicSubCategories = Array.from(
+    new Set([
+      ...(appSubCategories || defaultSubCategories),
+      ...(products || [])
+        .map((p) => p.subCategory)
+        .filter((sc) => sc && typeof sc === "string" && sc.trim().length > 0),
+    ])
+  );
 
-  const filteredProducts = products.filter((prod) => {
+  const subCategories = ["All", ...dynamicSubCategories];
+
+  const isCategoryMatch = (productCat = "", selectedCat = "") => {
+    if (!selectedCat || selectedCat === "All") return true;
+    const p = String(productCat).toLowerCase();
+    const s = String(selectedCat).toLowerCase();
+    if (p === s) return true;
+    if ((s.includes("birthday") || s.includes("kid")) && (p.includes("birthday") || p.includes("kid"))) return true;
+    if ((s.includes("romantic") || s.includes("anniversary")) && (p.includes("romantic") || p.includes("anniversary"))) return true;
+    if ((s.includes("baby") || s.includes("welcome")) && (p.includes("baby") || p.includes("welcome"))) return true;
+    if ((s.includes("stage") || s.includes("wedding")) && (p.includes("stage") || p.includes("wedding"))) return true;
+    if ((s.includes("traditional") || s.includes("house")) && (p.includes("traditional") || p.includes("house"))) return true;
+    if ((s.includes("specialty") || s.includes("festive") || s.includes("car")) && (p.includes("specialty") || p.includes("festive") || p.includes("car"))) return true;
+    return p.includes(s) || s.includes(p);
+  };
+
+  const isSubCategoryMatch = (prodSub = "", activeSub = "") => {
+    if (!activeSub || activeSub === "All") return true;
+    const p = String(prodSub).toLowerCase();
+    const a = String(activeSub).toLowerCase();
+    if (p === a) return true;
+    if (a.includes("wall") && p.includes("wall")) return true;
+    if (a.includes("ring") && p.includes("ring")) return true;
+    if (a.includes("room") && p.includes("room")) return true;
+    if ((a.includes("stage") || a.includes("backdrop")) && (p.includes("stage") || p.includes("backdrop"))) return true;
+    if ((a.includes("table") || a.includes("car")) && (p.includes("table") || p.includes("car"))) return true;
+    return p.includes(a) || a.includes(p);
+  };
+
+  const filteredProducts = (products || []).filter((prod) => {
     if (searchQuery.trim() !== "") {
       return prod.title.toLowerCase().includes(searchQuery.toLowerCase());
     }
-    const matchesCategory = selectedCategory === "All" || prod.category === selectedCategory;
-    const matchesSubCategory = activeSubCategory === "All" || prod.subCategory === activeSubCategory;
+    const matchesCategory = isCategoryMatch(prod.category, selectedCategory);
+    const matchesSubCategory = isSubCategoryMatch(prod.subCategory, activeSubCategory);
     return matchesCategory && matchesSubCategory;
   });
 
@@ -63,8 +88,8 @@ export default function FeaturedServices({
   };
 
   return (
-    <section id="catalog-section" className="py-12 md:py-16 bg-white relative border-t border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <section id="catalog-section" className="py-6 md:py-8 bg-white relative border-t border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
 
         {/* ── Section Header ── */}
         <div className="text-center max-w-2xl mx-auto space-y-3">
@@ -100,8 +125,8 @@ export default function FeaturedServices({
               ✨ Choose your celebration
             </div>
             <div className="flex gap-1 px-4 pt-4 pb-0 overflow-x-auto scroll-bar-remove md:justify-center md:gap-6 lg:gap-10">
-              {categories.map((cat, idx) => {
-                const isSelected = selectedCategory === cat.name;
+              {categories.map((cat) => {
+                const isSelected = isCategoryMatch(cat.name, selectedCategory);
                 return (
                   <button
                     key={cat.name}
@@ -137,7 +162,7 @@ export default function FeaturedServices({
         {/* ── 2. Subcategory shape chips ── */}
         <div className="flex items-center gap-2 overflow-x-auto py-1 scroll-bar-remove border-b border-gray-100 pb-4 md:justify-center md:gap-4">
           {subCategories.map((sub) => {
-            const isSelected = activeSubCategory === sub;
+            const isSelected = isSubCategoryMatch(sub, activeSubCategory);
             return (
               <button
                 key={sub}
@@ -145,7 +170,7 @@ export default function FeaturedServices({
                 onClick={() => setActiveSubCategory(sub)}
                 className={`flex-shrink-0 px-4 py-2 rounded-full border text-xs md:text-sm font-bold tracking-wide transition-all cursor-pointer font-sans ${
                   isSelected
-                    ? "bg-brand-plum text-white border-brand-plum shadow-sm"
+                    ? "bg-brand-plum text-white border-brand-plum shadow-md scale-105"
                     : "bg-white text-brand-plum/70 border-gray-200 hover:border-brand-gold hover:text-brand-plum"
                 }`}
               >
@@ -164,169 +189,135 @@ export default function FeaturedServices({
                 {filteredProducts.map((prod) => (
                   <ProductCard
                     key={prod.id}
-                    prod={prod}
-                    isFavorite={favorites[prod.id]}
-                    onToggleFavorite={toggleFavorite}
-                    getWhatsAppLink={getWhatsAppLink}
-                    onAddToCart={onAddToCart}
-                    style={{ width: 165, flexShrink: 0 }}
+                    product={prod}
+                    isFavorite={!!favorites[prod.id]}
+                    onToggleFavorite={() => toggleFavorite(prod.id)}
+                    getWhatsAppLink={() => getWhatsAppLink(prod)}
+                    onAddToCart={() => onAddToCart(prod)}
+                    isMobileScroll={true}
                   />
                 ))}
               </div>
             </div>
 
-            {/* Desktop: 4-col grid with larger gap */}
-            <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-2">
-              {filteredProducts.map((prod, idx) => (
+            {/* Desktop: 3-column grid */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProducts.map((prod) => (
                 <ProductCard
                   key={prod.id}
-                  prod={prod}
-                  isFavorite={favorites[prod.id]}
-                  onToggleFavorite={toggleFavorite}
-                  getWhatsAppLink={getWhatsAppLink}
-                  onAddToCart={onAddToCart}
-                  aos="fade-up"
-                  aosDelay={(idx % 4) * 100}
+                  product={prod}
+                  isFavorite={!!favorites[prod.id]}
+                  onToggleFavorite={() => toggleFavorite(prod.id)}
+                  getWhatsAppLink={() => getWhatsAppLink(prod)}
+                  onAddToCart={() => onAddToCart(prod)}
+                  isMobileScroll={false}
                 />
               ))}
             </div>
           </>
         ) : (
-          <div className="py-20 text-center max-w-md mx-auto space-y-4">
-            <div className="inline-block p-4 bg-brand-gold/10 rounded-full border border-brand-gold/30">
-              <Sparkles className="h-8 w-8 text-brand-gold animate-pulse" />
-            </div>
-            <h3 className="font-serif text-lg font-bold text-brand-plum">No decoration setups found</h3>
-            <p className="text-xs sm:text-sm text-brand-plum/70 font-sans leading-relaxed">
-              We couldn't find matches for "{searchQuery}" in this category. Try a different search or category!
+          <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-150">
+            <p className="text-sm font-bold text-brand-plum/70 font-sans">
+              No decorations match your current filter.
             </p>
             <button
-              onClick={() => onSelectCategory("All")}
-              className="bg-brand-plum text-white border border-brand-plum px-6 py-2 rounded-full font-sans text-xs tracking-wider uppercase font-bold hover:bg-brand-gold hover:text-brand-plum hover:border-brand-gold transition-all"
+              onClick={() => {
+                onSelectCategory("All");
+                setActiveSubCategory("All");
+              }}
+              className="mt-3 text-xs font-bold text-brand-gold underline font-sans cursor-pointer"
             >
               Reset Filters
             </button>
           </div>
         )}
 
-         {/* ── View All CTA ── */}
-         {filteredProducts.length > 0 && (
-           <div className="flex justify-center pt-4" data-aos="fade-up" data-aos-delay="200">
-             <a
-               href="/services"
-               className="flex items-center gap-2 border-2 border-brand-plum text-brand-plum hover:bg-brand-plum hover:text-white px-8 py-3 rounded-full font-sans font-bold text-sm transition-all duration-300"
-             >
-               View All Services
-               <ChevronRight className="h-4 w-4" />
-             </a>
-           </div>
-         )}
-
       </div>
     </section>
   );
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   PRODUCT CARD — reusable
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function ProductCard({ prod, isFavorite, onToggleFavorite, getWhatsAppLink, onAddToCart = () => {}, style = {}, aos = "", aosDelay = "" }) {
+function ProductCard({
+  product,
+  isFavorite,
+  onToggleFavorite,
+  onAddToCart,
+  onBook,
+  isMobileScroll,
+}) {
+  const { openBookingModal } = useApp();
+
   return (
     <div
-      className="product-card flex flex-col overflow-hidden group"
-      style={style}
-      data-aos={aos || undefined}
-      data-aos-delay={aosDelay || undefined}
+      className={`bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group ${
+        isMobileScroll ? "w-[260px] flex-shrink-0" : "w-full"
+      }`}
     >
-      {/* Image */}
-      <div className="relative aspect-square w-full bg-gray-50 overflow-hidden flex-shrink-0">
+      {/* Image container */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
         <img
-          src={prod.image}
-          alt={prod.title}
-          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          src={product.image}
+          alt={product.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
 
-        {/* Discount badge */}
-        {prod.discount && (
-          <span className="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold font-sans px-1.5 py-0.5 rounded shadow-sm">
-            {prod.discount}
-          </span>
-        )}
-
-        {/* Favorite button */}
+        {/* Favorite Button */}
         <button
-          id={`fav-${prod.id}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavorite(prod.id);
-          }}
-          className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white border border-white/60 transition-colors shadow-sm cursor-pointer z-10"
-          aria-label="Save to favorites"
+          onClick={onToggleFavorite}
+          className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-md rounded-full shadow-sm hover:scale-110 transition-transform cursor-pointer"
         >
           <Heart
-            className={`h-3.5 w-3.5 transition-transform duration-300 active:scale-125 ${
-              isFavorite ? "fill-red-500 text-red-500" : "text-gray-300"
+            className={`h-4 w-4 transition-colors ${
+              isFavorite ? "fill-red-500 text-red-500" : "text-gray-400 hover:text-red-500"
             }`}
           />
         </button>
 
-        {/* Subcategory tag */}
-        <span className="absolute bottom-2 left-2 bg-brand-plum/90 text-white text-[8px] font-bold font-sans px-1.5 py-0.5 rounded shadow-sm">
-          {prod.subCategory}
-        </span>
+        {/* Rating badge */}
+        <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 font-sans">
+          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+          <span>{product.rating}</span>
+        </div>
       </div>
 
-      {/* Card body */}
-      <div className="p-2.5 flex flex-col flex-grow gap-1">
-        {/* Rating + ID */}
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-0.5 bg-brand-gold/10 text-brand-plum text-[9px] font-bold font-sans px-1.5 py-0.5 rounded border border-brand-gold/20">
-            <Star className="h-2.5 w-2.5 text-brand-gold fill-brand-gold" />
-            {prod.rating}
+      {/* Content */}
+      <div className="p-4 flex-grow flex flex-col justify-between space-y-3">
+        <div>
+          <span className="text-[10px] font-bold text-brand-gold uppercase tracking-wider font-sans">
+            {product.subCategory}
           </span>
-          <span className="text-[9px] text-brand-plum/40 font-sans">ID: {prod.id}</span>
+          <h3 className="text-sm font-bold text-brand-plum line-clamp-2 leading-snug font-sans mt-0.5">
+            {product.title}
+          </h3>
         </div>
 
-        {/* Title */}
-        <h4 className="text-[11px] sm:text-xs font-serif font-bold text-brand-plum group-hover:text-brand-gold transition-colors leading-tight line-clamp-2 min-h-[28px]">
-          {prod.title}
-        </h4>
+        <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
+          <div>
+            <div className="text-xs text-gray-400 line-through font-sans">
+              ₹{product.originalPrice}
+            </div>
+            <div className="text-base font-black text-brand-plum font-sans">
+              ₹{product.price}
+            </div>
+          </div>
 
-        {/* Price row */}
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-sm font-black text-brand-gold font-sans">₹{prod.price.toLocaleString()}</span>
-          {prod.originalPrice && (
-            <span className="text-[9px] text-gray-400 line-through font-sans">₹{prod.originalPrice.toLocaleString()}</span>
-          )}
-        </div>
-
-        {/* Dual Actions: Add to Cart + WhatsApp Enquiry */}
-        <div className="flex gap-1.5 mt-auto pt-1">
-          <button
-            id={`add-to-cart-${prod.id}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddToCart(prod);
-            }}
-            className="flex-1 bg-brand-plum hover:bg-brand-gold text-white hover:text-brand-plum py-2 rounded-xl text-[9px] sm:text-[10px] font-bold tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer shadow-sm hover:shadow-md"
-          >
-            <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
-            <span>Add to Cart</span>
-          </button>
-
-          <a
-            id={`enquire-${prod.id}`}
-            href={getWhatsAppLink(prod)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer"
-            aria-label="Enquire on WhatsApp"
-          >
-            <svg viewBox="0 0 24 24" className="h-4.5 w-4.5 fill-current">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-            </svg>
-          </a>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={onAddToCart}
+              className="p-2.5 bg-brand-gold/15 hover:bg-brand-gold text-brand-plum hover:text-white rounded-xl transition-all cursor-pointer"
+              title="Add to Cart"
+            >
+              <ShoppingCart className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => openBookingModal(product)}
+              className="bg-brand-plum hover:bg-brand-plum/90 text-white px-3.5 py-2 rounded-xl text-xs font-bold font-sans flex items-center gap-1 transition-all shadow-sm cursor-pointer"
+            >
+              <span>Book</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -56,7 +56,7 @@ export default function ContactForm() {
 - Event Date: ${formData.eventDate}
 - Message: ${formData.message}`;
 
-    const whatsappUrl = `https://wa.me/917075555987?text=${encodeURIComponent(messageText)}`;
+    const whatsappUrl = `https://wa.me/919848677418?text=${encodeURIComponent(messageText)}`;
 
     // Show success state
     setIsSubmitted(true);

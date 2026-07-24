@@ -2,13 +2,13 @@
 import { Phone } from "lucide-react";
 
 export default function FloatingActions() {
-  const whatsappUrl = "https://wa.me/917075555987?text=Hello%20Decor%20Dazzlers,%20I%20would%20like%20to%20enquire%20about%20your%20luxury%20decoration%20services%20for%20an%20event!";
+  const whatsappUrl = "https://wa.me/919848677418?text=Hello%20Decor%20Dazzlers,%20I%20would%20like%20to%20enquire%20about%20your%20luxury%20decoration%20services%20for%20an%20event!";
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-3">
       {/* Call Button */}
       <a
-        href="tel:+917075555987"
+        href="tel:+919848677418"
         className="flex items-center justify-center w-12 h-12 rounded-full bg-brand-plum text-brand-gold border border-brand-gold/45 shadow-xl hover:bg-brand-gold hover:text-brand-plum transition-all duration-300 transform hover:-translate-y-1 gold-glow group relative"
         aria-label="Call Decor Dazzlers"
       >

@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default function ContactPage() {
-  const whatsappUrl = "https://wa.me/917075555987?text=Hello%20Decor%20Dazzlers!%20I'm%20interested%20in%20a%20luxury%20decoration%20consultation.";
+  const whatsappUrl = "https://wa.me/919848677418?text=Hello%20Decor%20Dazzlers!%20I'm%20interested%20in%20a%20luxury%20decoration%20consultation.";
 
   return (
     <div className="bg-brand-cream min-h-screen">
@@ -55,8 +55,8 @@ export default function ContactPage() {
                     <h4 className="text-xs uppercase tracking-widest font-sans font-bold text-brand-plum/60 mb-1">
                       Call Support
                     </h4>
-                    <a href="tel:+917075555987" className="text-sm sm:text-base font-serif font-semibold text-brand-plum hover:text-brand-gold transition-colors block break-words">
-                      +91 70755 55987
+                    <a href="tel:+919848677418" className="text-sm sm:text-base font-serif font-semibold text-brand-plum hover:text-brand-gold transition-colors block break-words">
+                      +91 98486 77418
                     </a>
                   </div>
                 </div>

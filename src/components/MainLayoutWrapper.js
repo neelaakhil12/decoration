@@ -1,12 +1,18 @@
 "use client";
+import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BottomNav from "@/components/BottomNav";
 import FloatingActions from "@/components/FloatingActions";
 import CartDrawer from "@/components/CartDrawer";
+import LocationModal from "@/components/LocationModal";
+import BookingModal from "@/components/BookingModal";
 import { useApp } from "@/components/AppContext";
 
 export default function MainLayoutWrapper({ children }) {
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith("/admin") || pathname?.startsWith("/adminlogin");
+
   const {
     location,
     selectLocation,
@@ -16,6 +22,14 @@ export default function MainLayoutWrapper({ children }) {
     isLocationOpen,
     setIsLocationOpen
   } = useApp();
+
+  if (isAdminRoute) {
+    return (
+      <main className="min-h-screen bg-white">
+        {children}
+      </main>
+    );
+  }
 
   return (
     <>
@@ -28,7 +42,7 @@ export default function MainLayoutWrapper({ children }) {
       />
       
       {/* Account for header height and bottom mobile navigation height */}
-      <main className="flex-grow pt-36 md:pt-40 pb-16 md:pb-0 bg-white">
+      <main className="flex-grow pt-[205px] md:pt-44 pb-16 md:pb-0 bg-white">
         {children}
       </main>
 
@@ -36,6 +50,13 @@ export default function MainLayoutWrapper({ children }) {
       <FloatingActions />
       <BottomNav cartCount={cartCount} />
       <CartDrawer />
+      <LocationModal
+        isOpen={isLocationOpen}
+        onClose={() => setIsLocationOpen(false)}
+        currentLocation={location}
+        onSelectLocation={selectLocation}
+      />
+      <BookingModal />
     </>
   );
 }

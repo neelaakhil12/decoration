@@ -11,27 +11,17 @@ export default function CartDrawer() {
     setIsCartOpen,
     updateCartQuantity,
     removeFromCart,
-    clearCart
+    clearCart,
+    openBookingModal
   } = useApp();
 
   if (!isCartOpen) return null;
 
   const handleSendWhatsAppOrder = () => {
     if (cart.length === 0) return;
-
-    let messageText = "Hello Decor Dazzlers! I want to check availability & book the following decoration setups:\n\n";
-    cart.forEach((item, index) => {
-      messageText += `${index + 1}. ${item.title} (ID: ${item.id})\n   Qty: ${item.quantity} x ₹${item.price.toLocaleString("en-IN")} = ₹${(item.price * item.quantity).toLocaleString("en-IN")}\n\n`;
-    });
-
-    messageText += `--------------------------------\n`;
-    messageText += `Total Items: ${cartCount}\n`;
-    messageText += `Estimated Total: ₹${cartTotal.toLocaleString("en-IN")}\n\n`;
-    messageText += "Please let me know the available setup slots for Hyderabad. Thank you!";
-
-    const encodedText = encodeURIComponent(messageText);
-    const whatsappUrl = `https://wa.me/917075555987?text=${encodedText}`;
-    window.open(whatsappUrl, "_blank");
+    setIsCartOpen(false);
+    const cartSummary = cart.map((i) => `${i.title} (x${i.quantity})`).join(", ");
+    openBookingModal({ title: `Cart Items (${cartCount}): ${cartSummary} - ₹${cartTotal}` });
   };
 
   return (

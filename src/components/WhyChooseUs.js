@@ -1,12 +1,86 @@
 "use client";
+import { useState, useEffect, useRef } from "react";
 import { Zap, Calendar, Award, ShieldCheck, Heart } from "lucide-react";
 
+function AnimatedStatItem({ target, decimals = 0, suffix = "", label, isVisible }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isVisible) {
+      setCount(0);
+      return;
+    }
+
+    const duration = 1800; // 1.8 seconds animation
+    const startTime = performance.now();
+    let animationFrameId;
+
+    const updateCount = (currentTime) => {
+      const elapsedTime = currentTime - startTime;
+      const progress = Math.min(elapsedTime / duration, 1);
+      
+      // Ease-out cubic animation formula for smooth slowdown at end
+      const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+      const currentVal = target * easeOutProgress;
+
+      setCount(currentVal);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(updateCount);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(updateCount);
+
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, [isVisible, target]);
+
+  const formattedValue = decimals > 0 
+    ? count.toFixed(decimals) 
+    : Math.floor(count).toLocaleString("en-US");
+
+  return (
+    <div className="space-y-1 py-2 px-1 flex flex-col justify-center items-center">
+      <div className="text-2xl sm:text-3xl lg:text-4xl font-sans font-black text-brand-gold tracking-tight">
+        {formattedValue}{suffix}
+      </div>
+      <p className="text-[11px] sm:text-xs font-sans font-medium text-brand-pink/80 leading-tight">
+        {label}
+      </p>
+    </div>
+  );
+}
+
 export default function WhyChooseUs() {
+  const statsContainerRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.2 }
+    );
+
+    if (statsContainerRef.current) {
+      observer.observe(statsContainerRef.current);
+    }
+
+    return () => {
+      if (statsContainerRef.current) {
+        observer.unobserve(statsContainerRef.current);
+      }
+    };
+  }, []);
+
   const stats = [
-    { num: "10,000+", label: "Happy Customers" },
-    { num: "50,000+", label: "Orders Completed" },
-    { num: "5+", label: "Cities Served" },
-    { num: "4.9/5", label: "Average Rating" },
+    { target: 10000, suffix: "+", label: "Happy Customers" },
+    { target: 50000, suffix: "+", label: "Orders Completed" },
+    { target: 5, suffix: "+", label: "Cities Served" },
+    { target: 4.9, decimals: 1, suffix: "/5", label: "Average Rating" },
   ];
 
   const features = [
@@ -33,38 +107,32 @@ export default function WhyChooseUs() {
   ];
 
   return (
-    <section className="py-12 bg-white relative border-t border-gray-100 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+    <section className="py-6 md:py-8 bg-white relative border-t border-gray-100 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-8">
         
-        {/* ── Stats Strip Row ── */}
+        {/* ── Stats Strip Row with Scroll-Triggered Counting Animation ── */}
         <div 
-          className="rounded-3xl stats-strip text-white p-8 md:p-10 shadow-xl relative overflow-hidden"
-          data-aos="fade-up"
-          data-aos-duration="1000"
+          ref={statsContainerRef}
+          className="rounded-3xl stats-strip text-white p-5 sm:p-8 md:p-10 shadow-xl relative overflow-hidden"
         >
           {/* Subtle decorative glow */}
           <div className="absolute top-0 right-1/4 w-72 h-72 bg-brand-gold/10 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center divide-y lg:divide-y-0 lg:divide-x divide-white/10">
-            {stats.map((s, idx) => (
-              <div 
-                key={s.label} 
-                className={`space-y-1 ${idx > 1 ? "pt-6 lg:pt-0" : ""} ${idx === 1 ? "pt-6 lg:pt-0 border-t-0" : ""}`}
-                data-aos="zoom-in"
-                data-aos-delay={idx * 150}
-              >
-                <div className="text-3xl sm:text-4xl font-sans font-black text-brand-gold">
-                  {s.num}
-                </div>
-                <p className="text-xs sm:text-sm font-sans font-medium text-brand-pink/80">
-                  {s.label}
-                </p>
-              </div>
+          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 text-center lg:divide-x divide-white/10">
+            {stats.map((s) => (
+              <AnimatedStatItem
+                key={s.label}
+                target={s.target}
+                decimals={s.decimals || 0}
+                suffix={s.suffix}
+                label={s.label}
+                isVisible={isVisible}
+              />
             ))}
           </div>
         </div>
 
-        {/* ── Core Value Propositions (Ebo style features) ── */}
+        {/* ── Core Value Propositions ── */}
         <div className="space-y-6">
           <div className="text-center max-w-xl mx-auto space-y-2" data-aos="fade-up">
             <div className="section-badge">

@@ -5,21 +5,23 @@ import { Sparkles, PartyPopper } from "lucide-react";
 export default function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
   const [isPopped, setIsPopped] = useState(false);
+  const [hidePopper, setHidePopper] = useState(false);
   const [showLogo, setShowLogo] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    // 1. Trigger Party Popper Blast at 300ms
+    // 1. Trigger Party Popper Blast at 200ms
     const popperTimer = setTimeout(() => {
       setIsPopped(true);
       triggerConfettiCannon();
-    }, 300);
+    }, 200);
 
-    // 2. Reveal Logo at 600ms
+    // 2. Hide Popper Icon & Reveal Clean Logo at 750ms
     const logoTimer = setTimeout(() => {
+      setHidePopper(true);
       setShowLogo(true);
-    }, 600);
+    }, 750);
 
     // 3. Start Fade-out transition at 2600ms
     const fadeTimer = setTimeout(() => {
@@ -48,26 +50,26 @@ export default function SplashScreen() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const colors = ["#D4A64A", "#F472B6", "#9333EA", "#10B981", "#3B82F6", "#F59E0B", "#EC4899", "#FFFFFF"];
+    const colors = ["#D4A64A", "#F472B6", "#9333EA", "#10B981", "#3B82F6", "#F59E0B", "#EC4899", "#2563EB"];
     const particles = [];
-    const particleCount = 120;
+    const particleCount = 140;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
     for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 12 + 6;
+      const speed = Math.random() * 14 + 7;
       particles.push({
         x: centerX,
         y: centerY,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 4,
-        size: Math.random() * 8 + 4,
+        vy: Math.sin(angle) * speed - 5,
+        size: Math.random() * 9 + 4,
         color: colors[Math.floor(Math.random() * colors.length)],
         rotation: Math.random() * 360,
-        rotationSpeed: Math.random() * 10 - 5,
+        rotationSpeed: Math.random() * 12 - 6,
         opacity: 1,
-        gravity: 0.18,
+        gravity: 0.2,
         drag: 0.96,
         shape: Math.random() > 0.4 ? "rect" : "circle"
       });
@@ -88,7 +90,7 @@ export default function SplashScreen() {
         p.vx *= p.drag;
         p.vy *= p.drag;
         p.rotation += p.rotationSpeed;
-        p.opacity -= 0.012;
+        p.opacity -= 0.011;
 
         ctx.save();
         ctx.translate(p.x, p.y);
@@ -126,65 +128,74 @@ export default function SplashScreen() {
       <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10" />
 
       {/* Subtle Gold/Pink Shimmer Aura in background */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-pink-200/40 via-amber-200/40 to-blue-200/40 rounded-full blur-3xl animate-pulse pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-pink-100/50 via-amber-100/40 to-blue-100/50 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-20 flex flex-col items-center justify-center p-6 text-center space-y-6 max-w-md mx-auto">
         
-        {/* ── 1. Party Popper Icon Blast Animation ── */}
-        <div className="relative">
-          {/* Shockwave Rings on Popper Blast */}
-          {isPopped && (
-            <>
-              <div className="absolute inset-0 rounded-full border-2 border-[#2563EB]/40 animate-ping" />
-              <div className="absolute -inset-4 rounded-full border border-amber-400/50 animate-pulse" />
-            </>
-          )}
-
-          <div
-            className={`p-5 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 shadow-xl transition-all duration-500 flex items-center justify-center ${
-              isPopped ? "scale-125 rotate-12 bg-amber-100 text-amber-700 shadow-2xl" : "scale-100"
-            }`}
-          >
-            <PartyPopper className={`h-12 w-12 sm:h-16 sm:w-16 transition-transform ${isPopped ? "animate-bounce text-[#2563EB]" : "text-amber-600"}`} />
-          </div>
-
-          {/* Floating Emoji Pops */}
-          {isPopped && (
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-4 text-2xl animate-fade-in">
-              <span className="animate-bounce delay-75">🎉</span>
-              <span className="animate-bounce delay-150">🎈</span>
-              <span className="animate-bounce delay-200">✨</span>
-              <span className="animate-bounce delay-300">🥳</span>
-            </div>
-          )}
-        </div>
-
-        {/* ── 2. Logo & Brand Name Reveal ── */}
+        {/* ── 1. Party Popper Icon Blast Animation (Fades out after blast) ── */}
         <div
-          className={`transition-all duration-700 transform space-y-3 ${
-            showLogo
-              ? "opacity-100 translate-y-0 scale-100"
-              : "opacity-0 translate-y-6 scale-90"
+          className={`transition-all duration-500 ease-out transform ${
+            hidePopper
+              ? "opacity-0 scale-50 -translate-y-8 max-h-0 pointer-events-none hidden"
+              : "opacity-100 scale-100 max-h-40"
           }`}
         >
-          {/* Brand Logo */}
+          <div className="relative inline-block">
+            {/* Shockwave Rings on Popper Blast */}
+            {isPopped && (
+              <>
+                <div className="absolute inset-0 rounded-full border-2 border-[#2563EB]/40 animate-ping" />
+                <div className="absolute -inset-4 rounded-full border border-amber-400/50 animate-pulse" />
+              </>
+            )}
+
+            <div
+              className={`p-5 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 shadow-xl transition-all duration-500 flex items-center justify-center ${
+                isPopped ? "scale-125 rotate-12 bg-amber-100 text-amber-700 shadow-2xl" : "scale-100"
+              }`}
+            >
+              <PartyPopper className={`h-12 w-12 sm:h-16 sm:w-16 transition-transform ${isPopped ? "animate-bounce text-[#2563EB]" : "text-amber-600"}`} />
+            </div>
+
+            {/* Floating Emoji Pops */}
+            {isPopped && (
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-4 text-2xl animate-fade-in">
+                <span className="animate-bounce delay-75">🎉</span>
+                <span className="animate-bounce delay-150">🎈</span>
+                <span className="animate-bounce delay-200">✨</span>
+                <span className="animate-bounce delay-300">🥳</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── 2. Logo & Brand Name Reveal (Crystal Clear Image) ── */}
+        <div
+          className={`transition-all duration-700 ease-out transform space-y-4 ${
+            showLogo
+              ? "opacity-100 translate-y-0 scale-100"
+              : "opacity-0 translate-y-8 scale-95"
+          }`}
+        >
+          {/* High Clarity Crisp Logo Image */}
           <div className="flex justify-center">
             <img
               src="/logo.png"
               alt="Decor Dazzlers Logo"
-              className="h-28 sm:h-36 w-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.12)] animate-pulse"
+              className="h-32 sm:h-44 w-auto object-contain shrink-0"
+              style={{ imageRendering: "crisp-edges" }}
             />
           </div>
 
-          {/* Brand Name */}
-          <div className="space-y-1">
+          {/* Brand Name & Tagline */}
+          <div className="space-y-1.5">
             <h1 className="font-serif font-black text-3xl sm:text-4xl text-[#703A58] tracking-tight leading-none font-sans">
               Decor <span className="text-[#2563EB] italic font-serif">Dazzlers</span>
             </h1>
-            <p className="text-xs sm:text-sm text-gray-600 font-sans tracking-wide font-bold flex items-center justify-center gap-1.5 pt-1">
-              <Sparkles className="h-3.5 w-3.5 text-[#2563EB] animate-spin" />
+            <p className="text-xs sm:text-sm text-gray-700 font-sans tracking-wide font-extrabold flex items-center justify-center gap-1.5 pt-1">
+              <Sparkles className="h-4 w-4 text-[#2563EB]" />
               <span>Hyderabad's Premium Party & Event Decorators</span>
-              <Sparkles className="h-3.5 w-3.5 text-[#2563EB] animate-spin" />
+              <Sparkles className="h-4 w-4 text-[#2563EB]" />
             </p>
           </div>
         </div>

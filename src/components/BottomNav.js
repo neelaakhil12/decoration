@@ -1,17 +1,15 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Grid, Info, Phone, ShoppingBag } from "lucide-react";
-import { useApp } from "@/components/AppContext";
+import { Home, Grid, Sparkles, Info, Phone } from "lucide-react";
 
-export default function BottomNav({ cartCount = 0 }) {
+export default function BottomNav() {
   const pathname = usePathname();
-  const { setIsCartOpen } = useApp();
 
   const tabs = [
     { name: "Home", href: "/", icon: Home },
     { name: "Services", href: "/services", icon: Grid },
-    { name: "Cart", href: "#", icon: ShoppingBag, isCart: true },
+    { name: "Packages", href: "/gallery", icon: Sparkles },
     { name: "About", href: "/about", icon: Info },
     { name: "Contact", href: "/contact", icon: Phone },
   ];
@@ -26,12 +24,6 @@ export default function BottomNav({ cartCount = 0 }) {
           <Link
             key={tab.name}
             href={tab.href}
-            onClick={(e) => {
-              if (tab.isCart) {
-                e.preventDefault();
-                setIsCartOpen(true);
-              }
-            }}
             className={`flex flex-col items-center justify-center flex-1 py-1 transition-all relative ${
               isActive 
                 ? "text-brand-gold scale-105" 
@@ -40,11 +32,6 @@ export default function BottomNav({ cartCount = 0 }) {
           >
             <div className="relative">
               <Icon className={`h-4.5 w-4.5 ${isActive ? "stroke-[2.2]" : "stroke-[1.6]"}`} />
-              {tab.isCart && cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-2.5 bg-red-500 text-white rounded-full text-[8px] font-black h-3.5 w-3.5 flex items-center justify-center shadow-sm">
-                  {cartCount}
-                </span>
-              )}
             </div>
             <span className="text-[9px] font-sans font-bold mt-1 tracking-wide uppercase whitespace-nowrap">
               {tab.name}

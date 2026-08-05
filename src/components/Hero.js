@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Zap, Calendar, Star, CheckCircle, MapPin, ChevronDown } from "lucide-react";
+import { Zap, Calendar, Star, CheckCircle, MapPin, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
 import { useApp } from "@/components/AppContext";
 
 export default function Hero({ onSelectCategory = () => {} }) {
-  const { heroSliders, openBookingModal, categoryPosters: appCategoryPosters } = useApp();
+  const { heroSliders, openBookingModal, categoryPosters: appCategoryPosters, heroVideoUrl } = useApp();
   const [celebrationIndex, setCelebrationIndex] = useState(0);
-  const [activeBanner, setActiveBanner] = useState(0);
+  const [isMuted, setIsMuted] = useState(true);
   const [activeCatChip, setActiveCatChip] = useState(0);
 
   const celebrations = [
@@ -17,15 +17,6 @@ export default function Hero({ onSelectCategory = () => {} }) {
     "Baby Shower 🍼",
     "Welcome Baby 👶",
     "Festival Decor 🪔",
-  ];
-
-  const promotionalBanners = heroSliders && heroSliders.length > 0 ? heroSliders : [
-    {
-      title: "15% OFF First Order",
-      gradient: "linear-gradient(135deg, #5C2E46 0%, #8A4F6E 100%)",
-      tag: "Limited Offer",
-      subtitle: "Decor Dazzlers · Hyderabad — Same day setup available"
-    },
   ];
 
   const categoryPosters = appCategoryPosters && appCategoryPosters.length > 0 ? appCategoryPosters : [
@@ -55,12 +46,8 @@ export default function Hero({ onSelectCategory = () => {} }) {
     const textTimer = setInterval(() => {
       setCelebrationIndex((prev) => (prev + 1) % celebrations.length);
     }, 2000);
-    const bannerTimer = setInterval(() => {
-      setActiveBanner((prev) => (prev + 1) % promotionalBanners.length);
-    }, 4000);
     return () => {
       clearInterval(textTimer);
-      clearInterval(bannerTimer);
     };
   }, []);
 
@@ -72,55 +59,50 @@ export default function Hero({ onSelectCategory = () => {} }) {
   };
 
   return (
-    <section className="relative w-full overflow-hidden bg-white">
+    <section className="relative w-full overflow-hidden bg-brand-cream">
       {/* ────────────────────────────────────────────────────────
            DESKTOP: Full-width stacked hero
       ─────────────────────────────────────────────────────── */}
       <div className="hidden md:block w-full">
 
-        {/* ── 1. Full-width Promotional Banner Slider ── */}
-        <div
-          className="relative w-full overflow-hidden"
-          style={{
-            background: promotionalBanners[activeBanner].gradient,
-            minHeight: 240,
-          }}
-        >
-          <div className="max-w-7xl mx-auto px-8 lg:px-16 h-full flex flex-col justify-center py-8">
-            <span className="text-white/60 text-[11px] uppercase tracking-widest font-bold font-sans mb-2">
-              {promotionalBanners[activeBanner].tag}
-            </span>
-            <div className="text-white font-black text-4xl lg:text-5xl font-sans leading-tight max-w-2xl">
-              {promotionalBanners[activeBanner].title}
-            </div>
-            <div className="text-white/70 text-sm font-sans mt-2">
-              {promotionalBanners[activeBanner]?.subtitle || "Decor Dazzlers · Hyderabad — Same day setup available"}
-            </div>
-          </div>
+        {/* ── 1. Hero Video Player Banner ── */}
+        <div className="relative w-full overflow-hidden bg-black flex items-center justify-center min-h-[380px] max-h-[540px]">
+          <video
+            key={heroVideoUrl}
+            src={heroVideoUrl || "/hero_video.mp4"}
+            autoPlay
+            loop
+            muted={isMuted}
+            playsInline
+            preload="auto"
+            className="w-full h-full object-cover min-h-[380px] max-h-[540px] transform-gpu contrast-[1.04] brightness-[1.02] saturate-[1.08] image-render-crisp"
+          />
+          {/* Subtle bottom shadow overlay for buttons & transition */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 pointer-events-none" />
 
-          {/* Slide dots */}
-          <div className="absolute bottom-6 right-10 flex gap-2 z-10">
-            {promotionalBanners.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveBanner(i)}
-                className={`h-2.5 rounded-full transition-all cursor-pointer ${
-                  i === activeBanner ? "w-8 bg-white" : "w-2.5 bg-white/35"
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Decorative elements */}
-          <div className="absolute top-6 right-20 text-7xl opacity-10 select-none pointer-events-none">🎉</div>
-          <div className="absolute bottom-6 right-52 text-5xl opacity-10 select-none pointer-events-none">🎈</div>
-          <div className="absolute top-10 right-60 text-4xl opacity-10 select-none pointer-events-none">✨</div>
+          {/* Sound Mute/Unmute Control */}
+          <button
+            type="button"
+            onClick={() => setIsMuted(!isMuted)}
+            className="absolute bottom-6 right-8 bg-black/70 hover:bg-black/90 text-white px-4 py-2.5 rounded-full backdrop-blur-md border border-white/30 transition-all cursor-pointer shadow-xl hover:scale-105 flex items-center gap-2 text-xs font-sans font-semibold z-20"
+          >
+            {isMuted ? (
+              <>
+                <VolumeX className="h-4 w-4 text-white/80" />
+                <span>Unmute Sound</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="h-4 w-4 text-brand-gold animate-pulse" />
+                <span>Mute Sound</span>
+              </>
+            )}
+          </button>
         </div>
 
         {/* ── 2. "What are you celebrating?" Header ── */}
         <div 
           className="max-w-7xl mx-auto px-8 lg:px-16 pt-8 pb-4 flex items-center justify-between"
-          data-aos="fade-up"
         >
           <div>
             <h2 className="text-2xl font-serif font-black text-brand-plum leading-tight">
@@ -148,21 +130,16 @@ export default function Hero({ onSelectCategory = () => {} }) {
         </div>
 
         {/* ── 3. Full-width Category Poster Grid ── */}
-        <div className="max-w-7xl mx-auto px-8 lg:px-16 pb-10">
+        <div className="max-w-7xl mx-auto px-8 lg:px-16 pb-3">
           <div className="grid grid-cols-5 gap-4">
             {categoryPosters.map((cat, idx) => (
               <div
                 key={idx}
-                onClick={() => {
-                  onSelectCategory(cat.key);
-                  handleScrollToCatalog();
-                }}
+                onClick={() => onSelectCategory(cat.key)}
                 className={`relative rounded-2xl overflow-hidden cursor-pointer group shadow-sm hover:shadow-xl transition-all duration-300 ${
                   idx < 2 ? "col-span-2" : "col-span-1"
                 }`}
                 style={{ aspectRatio: idx < 2 ? "2/1" : "1/1" }}
-                data-aos="fade-up"
-                data-aos-delay={idx * 75}
               >
                 <img
                   src={cat.image}
@@ -190,10 +167,10 @@ export default function Hero({ onSelectCategory = () => {} }) {
       {/* ───────────────────────────────────────────────────
            MOBILE: Full-screen app-like experience (Fine as confirmed by User)
       ─────────────────────────────────────────────────── */}
-      <div className="md:hidden w-full bg-white">
+      <div className="md:hidden w-full bg-brand-cream">
         <PhoneAppUI
-          activeBanner={activeBanner}
-          promotionalBanners={promotionalBanners}
+          isMuted={isMuted}
+          setIsMuted={setIsMuted}
           celebrationIndex={celebrationIndex}
           celebrations={celebrations}
           categoryPosters={categoryPosters}
@@ -201,6 +178,7 @@ export default function Hero({ onSelectCategory = () => {} }) {
           activeCatChip={activeCatChip}
           setActiveCatChip={setActiveCatChip}
           onSelectCategory={onSelectCategory}
+          heroVideoUrl={heroVideoUrl}
           isMobile={true}
         />
       </div>
@@ -212,8 +190,8 @@ export default function Hero({ onSelectCategory = () => {} }) {
    PHONE APP UI — renders inside the phone frame OR mobile
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 function PhoneAppUI({
-  activeBanner,
-  promotionalBanners,
+  isMuted,
+  setIsMuted,
   celebrationIndex,
   celebrations,
   categoryPosters,
@@ -221,66 +199,33 @@ function PhoneAppUI({
   activeCatChip,
   setActiveCatChip,
   onSelectCategory,
+  heroVideoUrl,
   isMobile = false,
 }) {
   return (
-    <div className="flex flex-col w-full bg-white min-h-full">
+    <div className="flex flex-col w-full bg-brand-cream min-h-full">
 
-      {/* ── Hero Banner Slider ── */}
-      <div
-        className="relative w-full overflow-hidden flex-shrink-0"
-        style={{
-          background: promotionalBanners[activeBanner].gradient,
-          minHeight: 180,
-        }}
-      >
-        {/* Banner content */}
-        <div className="absolute inset-0 flex flex-col justify-end p-4 z-10">
-          <span className="text-white/70 text-[9px] uppercase tracking-widest font-bold font-sans mb-1">
-            {promotionalBanners[activeBanner].tag}
-          </span>
-          <div className="text-white font-black text-xl font-sans leading-tight">
-            {promotionalBanners[activeBanner].title}
-          </div>
-          <div className="text-white/80 text-[10px] font-sans mt-1">
-            {promotionalBanners[activeBanner]?.subtitle || "Decor Dazzlers · Hyderabad"}
-          </div>
-        </div>
+      {/* ── Hero Video (Mobile) ── */}
+      <div className="relative w-full overflow-hidden bg-black flex-shrink-0" style={{ height: 240 }}>
+        <video
+          key={heroVideoUrl}
+          src={heroVideoUrl || "/hero_video.mp4"}
+          autoPlay
+          loop
+          muted={isMuted}
+          playsInline
+          preload="auto"
+          className="w-full h-full object-cover transform-gpu contrast-[1.04] brightness-[1.02] saturate-[1.08]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 pointer-events-none" />
 
-        {/* Banner dots */}
-        <div className="absolute bottom-3 right-4 flex gap-1 z-10">
-          {promotionalBanners.map((_, i) => (
-            <span
-              key={i}
-              className={`block h-1.5 rounded-full transition-all ${
-                i === activeBanner ? "w-4 bg-white" : "w-1.5 bg-white/40"
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* Decorative emoji */}
-        <div className="absolute top-4 right-6 text-4xl opacity-30 select-none">🎉</div>
-        <div className="absolute top-8 right-16 text-2xl opacity-20 select-none">🎈</div>
-      </div>
-
-      {/* ── Speed + Schedule badges ── */}
-      <div className="flex items-center gap-2 px-3 pt-3 pb-1 flex-shrink-0">
-        <div className="flex items-center gap-1 text-brand-gold font-black text-base font-sans">
-          <Zap className="h-4 w-4 fill-brand-gold" />
-          <span>90 <span className="text-sm">mins</span></span>
-        </div>
-        <div className="w-px h-4 bg-gray-200 mx-1" />
-        <span className="bg-brand-gold text-white text-[9px] font-bold font-sans px-2 py-0.5 rounded-full flex items-center gap-1">
-          <Calendar className="h-2.5 w-2.5" />
-          Book upto <span className="text-yellow-200 font-black">90 days</span>
-        </span>
-        <div className="w-px h-4 bg-gray-200 mx-1" />
-        <div className="flex items-center gap-1 text-[9px] text-brand-plum/60 font-sans">
-          <MapPin className="h-2.5 w-2.5 text-brand-gold" />
-          <span className="font-semibold text-brand-plum">Hyderabad</span>
-          <ChevronDown className="h-2.5 w-2.5" />
-        </div>
+        <button
+          type="button"
+          onClick={() => setIsMuted(!isMuted)}
+          className="absolute bottom-3 right-3 bg-black/70 text-white p-2 rounded-full backdrop-blur-md border border-white/30 transition-all text-[10px] z-20 cursor-pointer shadow-md"
+        >
+          {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4 text-brand-gold" />}
+        </button>
       </div>
 
       {/* ── "What are you celebrating?" text ── */}

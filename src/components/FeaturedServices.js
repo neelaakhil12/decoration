@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { Sparkles, Star, Heart, ChevronRight, ShoppingCart } from "lucide-react";
 import { useApp } from "@/components/AppContext";
 
@@ -16,11 +17,14 @@ export default function FeaturedServices({
   const categories = [
     { name: "All", label: "All", image: "/images/birthday_decor.png" },
     { name: "Birthday", label: "Birthday", image: "/images/birthday_decor.png" },
-    { name: "Romantic", label: "Romantic", image: "/images/anniversary_decor.png" },
+    { name: "Baby Welcome", label: "Baby Welcome", image: "/images/welcome_baby_decor.png" },
+    { name: "Kid's Party", label: "Kid's Party", image: "/images/kids_birthday_decor.png" },
+    { name: "Anniversary", label: "Anniversary", image: "/images/anniversary_decor.png" },
     { name: "Baby Shower", label: "Baby Shower", image: "/images/baby_shower_decor.png" },
-    { name: "Stage & Wedding", label: "Weddings", image: "/images/stage_decor.png" },
-    { name: "Traditional", label: "Traditional", image: "/images/house_warming_decor.png" },
-    { name: "Specialty", label: "Specialty", image: "/images/car_decor.png" },
+    { name: "Stage & Wedding", label: "Stage & Wedding", image: "/images/stage_decor.png" },
+    { name: "House Warming", label: "House Warming", image: "/images/house_warming_decor.png" },
+    { name: "Festival Decor", label: "Festival Decor", image: "/images/festival_decor.png" },
+    { name: "Car Decor", label: "Car Decor", image: "/images/car_decor.png" },
   ];
 
   const defaultSubCategories = [
@@ -31,17 +35,6 @@ export default function FeaturedServices({
     "Table/Car Decor",
   ];
 
-  const dynamicSubCategories = Array.from(
-    new Set([
-      ...(appSubCategories || defaultSubCategories),
-      ...(products || [])
-        .map((p) => p.subCategory)
-        .filter((sc) => sc && typeof sc === "string" && sc.trim().length > 0),
-    ])
-  );
-
-  const subCategories = ["All", ...dynamicSubCategories];
-
   const isCategoryMatch = (productCat = "", selectedCat = "") => {
     if (!selectedCat || selectedCat === "All") return true;
     const p = String(productCat).toLowerCase();
@@ -49,32 +42,48 @@ export default function FeaturedServices({
     if (p === s) return true;
     if ((s.includes("birthday") || s.includes("kid")) && (p.includes("birthday") || p.includes("kid"))) return true;
     if ((s.includes("romantic") || s.includes("anniversary")) && (p.includes("romantic") || p.includes("anniversary"))) return true;
-    if ((s.includes("baby") || s.includes("welcome")) && (p.includes("baby") || p.includes("welcome"))) return true;
+    if ((s.includes("baby") || s.includes("welcome") || s.includes("shower")) && (p.includes("baby") || p.includes("welcome") || p.includes("shower"))) return true;
     if ((s.includes("stage") || s.includes("wedding")) && (p.includes("stage") || p.includes("wedding"))) return true;
     if ((s.includes("traditional") || s.includes("house")) && (p.includes("traditional") || p.includes("house"))) return true;
     if ((s.includes("specialty") || s.includes("festive") || s.includes("car")) && (p.includes("specialty") || p.includes("festive") || p.includes("car"))) return true;
     return p.includes(s) || s.includes(p);
   };
 
-  const isSubCategoryMatch = (prodSub = "", activeSub = "") => {
+  const isSubCategoryMatch = (prod, activeSub = "") => {
     if (!activeSub || activeSub === "All") return true;
-    const p = String(prodSub).toLowerCase();
+    const pSub = String(prod.decorShape || prod.subCategory || "").toLowerCase();
     const a = String(activeSub).toLowerCase();
-    if (p === a) return true;
-    if (a.includes("wall") && p.includes("wall")) return true;
-    if (a.includes("ring") && p.includes("ring")) return true;
-    if (a.includes("room") && p.includes("room")) return true;
-    if ((a.includes("stage") || a.includes("backdrop")) && (p.includes("stage") || p.includes("backdrop"))) return true;
-    if ((a.includes("table") || a.includes("car")) && (p.includes("table") || p.includes("car"))) return true;
-    return p.includes(a) || a.includes(p);
+
+    if (a.includes("wall") && pSub.includes("wall")) return true;
+    if (a.includes("ring") && pSub.includes("ring")) return true;
+    if (a.includes("room") && pSub.includes("room")) return true;
+    if ((a.includes("stage") || a.includes("backdrop")) && (pSub.includes("stage") || pSub.includes("backdrop"))) return true;
+    if ((a.includes("table") || a.includes("car")) && (pSub.includes("table") || pSub.includes("car"))) return true;
+
+    return pSub === a || pSub.includes(a) || a.includes(pSub);
   };
+
+  const allAvailableSubCats = Array.from(
+    new Set([
+      ...(appSubCategories || defaultSubCategories),
+      ...(products || [])
+        .flatMap((p) => [p.decorShape, p.subCategory])
+        .filter((sc) => sc && typeof sc === "string" && sc.trim().length > 0),
+    ])
+  );
+
+  const activeSubCategoriesWithPackages = allAvailableSubCats.filter((shape) => {
+    return (products || []).some((prod) => isSubCategoryMatch(prod, shape));
+  });
+
+  const subCategories = ["All", ...activeSubCategoriesWithPackages];
 
   const filteredProducts = (products || []).filter((prod) => {
     if (searchQuery.trim() !== "") {
       return prod.title.toLowerCase().includes(searchQuery.toLowerCase());
     }
     const matchesCategory = isCategoryMatch(prod.category, selectedCategory);
-    const matchesSubCategory = isSubCategoryMatch(prod.subCategory, activeSubCategory);
+    const matchesSubCategory = isSubCategoryMatch(prod, activeSubCategory);
     return matchesCategory && matchesSubCategory;
   });
 
@@ -88,8 +97,8 @@ export default function FeaturedServices({
   };
 
   return (
-    <section id="catalog-section" className="py-6 md:py-8 bg-white relative border-t border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+    <section id="catalog-section" className="py-8 md:py-14 lg:py-16 bg-brand-cream relative border-t border-brand-rosegold/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
 
         {/* ── Section Header ── */}
         <div className="text-center max-w-2xl mx-auto space-y-3">
@@ -124,7 +133,7 @@ export default function FeaturedServices({
             <div className="flex items-center gap-1 py-3 px-1 text-center justify-center text-sm md:text-base font-semibold text-brand-plum border-b border-white/60 font-sans">
               ✨ Choose your celebration
             </div>
-            <div className="flex gap-1 px-4 pt-4 pb-0 overflow-x-auto scroll-bar-remove md:justify-center md:gap-6 lg:gap-10">
+            <div className="flex gap-2 sm:gap-3 px-4 sm:px-6 pt-4 pb-1 overflow-x-auto scroll-bar-remove justify-start">
               {categories.map((cat) => {
                 const isSelected = isCategoryMatch(cat.name, selectedCategory);
                 return (
@@ -135,21 +144,21 @@ export default function FeaturedServices({
                       onSelectCategory(cat.name);
                       setActiveSubCategory("All");
                     }}
-                    className={`flex-shrink-0 flex flex-col items-center pt-3 px-4 pb-4 rounded-t-xl cursor-pointer transition-all duration-200 select-none ${
+                    className={`flex-shrink-0 flex flex-col items-center pt-2.5 px-2 pb-3 rounded-t-xl cursor-pointer transition-all duration-200 select-none ${
                       isSelected
-                        ? "bg-white shadow-md scale-105"
+                        ? "bg-white shadow-md scale-105 z-10"
                         : "bg-white/50 border-t border-white/60 hover:bg-white/80"
                     }`}
-                    style={{ width: 130, minHeight: 145 }}
+                    style={{ width: 112, minHeight: 135 }}
                   >
                     <img
                       src={cat.image}
                       alt={cat.label}
                       className="rounded-2xl object-cover shadow-sm"
-                      style={{ width: 96, height: 96 }}
+                      style={{ width: 80, height: 80 }}
                       loading="lazy"
                     />
-                    <span className="text-center leading-tight mt-2.5 text-brand-plum font-sans font-bold text-sm">
+                    <span className="text-center leading-tight mt-2 text-brand-plum font-sans font-bold text-xs line-clamp-2">
                       {cat.label}
                     </span>
                   </button>
@@ -157,27 +166,6 @@ export default function FeaturedServices({
               })}
             </div>
           </div>
-        </div>
-
-        {/* ── 2. Subcategory shape chips ── */}
-        <div className="flex items-center gap-2 overflow-x-auto py-1 scroll-bar-remove border-b border-gray-100 pb-4 md:justify-center md:gap-4">
-          {subCategories.map((sub) => {
-            const isSelected = isSubCategoryMatch(sub, activeSubCategory);
-            return (
-              <button
-                key={sub}
-                id={`subcat-chip-${sub.toLowerCase().replace(/\s/g, "-")}`}
-                onClick={() => setActiveSubCategory(sub)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full border text-xs md:text-sm font-bold tracking-wide transition-all cursor-pointer font-sans ${
-                  isSelected
-                    ? "bg-brand-plum text-white border-brand-plum shadow-md scale-105"
-                    : "bg-white text-brand-plum/70 border-gray-200 hover:border-brand-gold hover:text-brand-plum"
-                }`}
-              >
-                {sub}
-              </button>
-            );
-          })}
         </div>
 
         {/* ── 3. Products — Horizontal Scroll on mobile, Grid on desktop ── */}
@@ -247,25 +235,30 @@ function ProductCard({
 }) {
   const { openBookingModal } = useApp();
 
+  const detailUrl = `/products/decor/${product.id}/${encodeURIComponent((product.title || "").replace(/\s+/g, "-"))}`;
+
   return (
     <div
-      className={`bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group ${
+      className={`bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group p-2.5 ${
         isMobileScroll ? "w-[260px] flex-shrink-0" : "w-full"
       }`}
     >
       {/* Image container */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
-        <img
-          src={product.image}
-          alt={product.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
+      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100">
+        <Link href={detailUrl} className="block w-full h-full">
+          <img
+            src={product.image}
+            alt={product.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
+        </Link>
 
         {/* Favorite Button */}
         <button
+          type="button"
           onClick={onToggleFavorite}
-          className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-md rounded-full shadow-sm hover:scale-110 transition-transform cursor-pointer"
+          className="absolute top-2.5 right-2.5 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-sm hover:scale-110 transition-transform cursor-pointer z-10"
         >
           <Heart
             className={`h-4 w-4 transition-colors ${
@@ -274,50 +267,49 @@ function ProductCard({
           />
         </button>
 
-        {/* Rating badge */}
-        <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 font-sans">
-          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-          <span>{product.rating}</span>
+        {/* Category Tag on Image (Bottom-Left) */}
+        <div className="absolute bottom-2.5 left-2.5 bg-[#1E3A8A] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-md font-sans pointer-events-none">
+          {product.subCategory || product.category || "Wall Decor"}
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-4 flex-grow flex flex-col justify-between space-y-3">
-        <div>
-          <span className="text-[10px] font-bold text-brand-gold uppercase tracking-wider font-sans">
-            {product.subCategory}
-          </span>
-          <h3 className="text-sm font-bold text-brand-plum line-clamp-2 leading-snug font-sans mt-0.5">
-            {product.title}
-          </h3>
+      <div className="pt-3 px-1 pb-1 flex-grow flex flex-col justify-between space-y-2">
+        <div className="space-y-1.5">
+          {/* Rating Badge */}
+          <div className="bg-blue-50 text-blue-900 text-xs font-bold px-2.5 py-0.5 rounded-lg inline-flex items-center gap-1 font-sans w-fit">
+            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+            <span>{product.rating}</span>
+          </div>
+
+          {/* Title */}
+          <Link href={detailUrl} className="block">
+            <h3 className="text-sm font-bold text-brand-plum line-clamp-2 leading-snug font-sans hover:text-[#1E3A8A] transition-colors">
+              {product.title}
+            </h3>
+          </Link>
+
+          {/* Price */}
+          <div className="flex items-baseline gap-2 pt-0.5">
+            <span className="text-lg font-black text-[#1E3A8A] font-sans">
+              ₹{product.price}
+            </span>
+            {product.originalPrice && (
+              <span className="text-xs text-gray-400 line-through font-sans">
+                ₹{product.originalPrice}
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
-          <div>
-            <div className="text-xs text-gray-400 line-through font-sans">
-              ₹{product.originalPrice}
-            </div>
-            <div className="text-base font-black text-brand-plum font-sans">
-              ₹{product.price}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={onAddToCart}
-              className="p-2.5 bg-brand-gold/15 hover:bg-brand-gold text-brand-plum hover:text-white rounded-xl transition-all cursor-pointer"
-              title="Add to Cart"
-            >
-              <ShoppingCart className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => openBookingModal(product)}
-              className="bg-brand-plum hover:bg-brand-plum/90 text-white px-3.5 py-2 rounded-xl text-xs font-bold font-sans flex items-center gap-1 transition-all shadow-sm cursor-pointer"
-            >
-              <span>Book</span>
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
+        {/* Full-width Book Now Pill Button */}
+        <div className="pt-1">
+          <Link
+            href={detailUrl}
+            className="w-full bg-[#703A58] hover:bg-[#5C2F48] text-white font-sans text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center cursor-pointer"
+          >
+            Book Now
+          </Link>
         </div>
       </div>
     </div>

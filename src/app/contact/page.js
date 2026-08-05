@@ -13,7 +13,7 @@ export default function ContactPage() {
   return (
     <div className="bg-brand-cream min-h-screen">
       {/* Page Header */}
-      <section className="relative overflow-hidden bg-brand-plum text-brand-cream py-16">
+      <section className="relative overflow-hidden bg-brand-plum text-brand-cream py-8">
         <div className="absolute top-0 right-0 w-96 h-96 bg-brand-gold/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
@@ -30,7 +30,7 @@ export default function ContactPage() {
       </section>
 
       {/* Main Content Area */}
-      <section className="py-20">
+      <section className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             {/* Contact Details Column (5/12 cols) */}

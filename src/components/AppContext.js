@@ -151,9 +151,21 @@ export function AppProvider({ children }) {
   const defaultSubCategories = ["Wall Decor", "Ring Stand", "Room Decor", "Stage Backdrop", "Table/Car Decor"];
   const [subCategories, setSubCategories] = useState(defaultSubCategories);
 
+  const [heroVideoUrl, setHeroVideoUrl] = useState("/hero_video.mp4");
+
+  const updateHeroVideoUrl = (url) => {
+    setHeroVideoUrl(url);
+    try {
+      localStorage.setItem("decor_hero_video_url", url);
+    } catch (e) {}
+  };
+
   // Load stored data on mount if available in localStorage
   useEffect(() => {
     try {
+      const savedVideoUrl = localStorage.getItem("decor_hero_video_url");
+      if (savedVideoUrl) setHeroVideoUrl(savedVideoUrl);
+
       const savedSubCats = localStorage.getItem("decor_subcategories");
       if (savedSubCats) {
         const parsed = JSON.parse(savedSubCats);
@@ -656,6 +668,8 @@ export function AppProvider({ children }) {
         addGalleryItem,
         updateGalleryItem,
         deleteGalleryItem,
+        heroVideoUrl,
+        updateHeroVideoUrl,
         heroSliders,
         addHeroSlider,
         updateHeroSlider,

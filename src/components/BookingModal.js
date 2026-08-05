@@ -97,6 +97,15 @@ export default function BookingModal() {
       return;
     }
 
+    // Determine package URL link if a package is selected
+    let packageUrl = "";
+    if (bookingItem && bookingItem.id) {
+      const slugTitle = (bookingItem.title || "decoration-package").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+      packageUrl = typeof window !== "undefined"
+        ? `${window.location.origin}/products/decor/${bookingItem.id}/${slugTitle}`
+        : `https://decordazzlers.com/products/decor/${bookingItem.id}/${slugTitle}`;
+    }
+
     // Save booking details to Admin Panel
     if (addBooking) {
       addBooking({
@@ -105,13 +114,14 @@ export default function BookingModal() {
         email: email.trim(),
         requirement: selectedRequirement,
         selectedTheme: selectedThemeTitle || "General Inquiry",
+        packageUrl: packageUrl,
         address: address.trim(),
         locationLink: locationLink.trim(),
         customNotes: customNotes.trim(),
       });
     }
 
-    // Construct clean WhatsApp Message (no asterisks or special unicode symbols that fail on desktop)
+    // Construct clean WhatsApp Message
     let messageText = `DECOR DAZZLERS - BOOKING INQUIRY\n`;
     messageText += `----------------------------------------\n`;
     messageText += `Name: ${name.trim()}\n`;
@@ -120,6 +130,9 @@ export default function BookingModal() {
     messageText += `Decoration Requirement: ${selectedRequirement}\n`;
     if (selectedThemeTitle) {
       messageText += `Selected Theme: ${selectedThemeTitle}\n`;
+    }
+    if (packageUrl) {
+      messageText += `Package Link: ${packageUrl}\n`;
     }
     if (address.trim()) {
       messageText += `Address: ${address.trim()}\n`;

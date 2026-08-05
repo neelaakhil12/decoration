@@ -5,7 +5,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-50 border-t border-gray-100 pt-12 pb-6 relative overflow-hidden">
+    <footer className="bg-[#FAFAFA] border-t border-gray-200/60 pt-4 pb-20 md:pb-8 relative overflow-hidden">
       {/* Background Soft Glow */}
       <div className="absolute top-0 right-1/4 w-80 h-80 bg-brand-gold/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -64,13 +64,20 @@ export default function Footer() {
               Quick Links
             </h4>
             <ul className="space-y-2.5 font-sans text-xs text-brand-plum/80">
-              {["Home", "Our Services", "About Us", "Contact Us"].map((lnk, idx) => (
-                <li key={idx}>
+              {[
+                { name: "Home", href: "/" },
+                { name: "Our Services", href: "/services" },
+                { name: "Our Packages", href: "/gallery" },
+                { name: "Recent Projects", href: "/recent-projects" },
+                { name: "About Us", href: "/about" },
+                { name: "Contact Us", href: "/contact" },
+              ].map((lnk) => (
+                <li key={lnk.name}>
                   <Link
-                    href={lnk === "Home" ? "/" : lnk === "Our Services" ? "/services" : lnk === "About Us" ? "/about" : "/contact"}
+                    href={lnk.href}
                     className="hover:text-brand-gold transition-colors block"
                   >
-                    {lnk}
+                    {lnk.name}
                   </Link>
                 </li>
               ))}

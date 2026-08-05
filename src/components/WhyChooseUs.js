@@ -42,11 +42,11 @@ function AnimatedStatItem({ target, decimals = 0, suffix = "", label, isVisible 
     : Math.floor(count).toLocaleString("en-US");
 
   return (
-    <div className="space-y-1 py-2 px-1 flex flex-col justify-center items-center">
-      <div className="text-2xl sm:text-3xl lg:text-4xl font-sans font-black text-brand-gold tracking-tight">
+    <div className="space-y-1.5 py-2 px-1 flex flex-col justify-center items-center">
+      <div className="text-2xl sm:text-3xl lg:text-4xl font-sans font-black text-white tracking-tight drop-shadow-md">
         {formattedValue}{suffix}
       </div>
-      <p className="text-[11px] sm:text-xs font-sans font-medium text-brand-pink/80 leading-tight">
+      <p className="text-xs sm:text-sm font-sans font-bold text-white tracking-wide opacity-95">
         {label}
       </p>
     </div>
@@ -107,8 +107,8 @@ export default function WhyChooseUs() {
   ];
 
   return (
-    <section className="py-6 md:py-8 bg-white relative border-t border-gray-100 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-8">
+    <section className="py-8 md:py-14 lg:py-16 bg-brand-cream relative border-t border-brand-rosegold/10 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
         
         {/* ── Stats Strip Row with Scroll-Triggered Counting Animation ── */}
         <div 
@@ -118,7 +118,7 @@ export default function WhyChooseUs() {
           {/* Subtle decorative glow */}
           <div className="absolute top-0 right-1/4 w-72 h-72 bg-brand-gold/10 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 text-center lg:divide-x divide-white/10">
+          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 text-center lg:divide-x divide-white/20">
             {stats.map((s) => (
               <AnimatedStatItem
                 key={s.label}
@@ -134,7 +134,7 @@ export default function WhyChooseUs() {
 
         {/* ── Core Value Propositions ── */}
         <div className="space-y-6">
-          <div className="text-center max-w-xl mx-auto space-y-2" data-aos="fade-up">
+          <div className="text-center max-w-xl mx-auto space-y-2">
             <div className="section-badge">
               <Heart className="h-3.5 w-3.5 text-brand-gold fill-brand-gold" />
               Decor Dazzlers Trust
@@ -148,14 +148,12 @@ export default function WhyChooseUs() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
-            {features.map((feat, idx) => {
+            {features.map((feat) => {
               const Icon = feat.icon;
               return (
                 <div
                   key={feat.title}
                   className="bg-gray-50 border border-gray-100 hover:border-brand-gold/40 p-6 rounded-2xl transition-all duration-300 flex flex-col items-center text-center shadow-sm hover:shadow-md group"
-                  data-aos="fade-up"
-                  data-aos-delay={idx * 100}
                 >
                   <div className="bg-brand-gold/10 p-3 rounded-xl mb-4 group-hover:bg-brand-gold/20 transition-all">
                     <Icon className="h-6 w-6 text-brand-gold" />

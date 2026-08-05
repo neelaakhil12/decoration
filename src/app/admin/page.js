@@ -16,13 +16,16 @@ export default function AdminDashboardPage() {
     services, addService, updateService, deleteService,
     galleryItems, addGalleryItem, updateGalleryItem, deleteGalleryItem,
     heroSliders, addHeroSlider, updateHeroSlider, deleteHeroSlider,
+    heroVideoUrl, updateHeroVideoUrl,
     subCategories: appSubCategories, addSubCategory, deleteSubCategory,
     categoryPosters, addCategoryPoster, updateCategoryPoster, deleteCategoryPoster,
     bookings, updateBookingStatus, deleteBooking,
     reloadFromSupabase 
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState("services"); // "services" | "sliders" | "gallery" | "categories" | "bookings"
+  const [activeTab, setActiveTab] = useState("services"); // "services" | "hero-video" | "gallery" | "categories" | "bookings"
+  const [heroVideoInput, setHeroVideoInput] = useState("");
+  const [heroVideoSavedMessage, setHeroVideoSavedMessage] = useState("");
   const [bookingFilterStatus, setBookingFilterStatus] = useState("All");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminEmail, setAdminEmail] = useState("");
@@ -50,15 +53,28 @@ export default function AdminDashboardPage() {
   const [editingService, setEditingService] = useState(null);
   const [isCustomSubCatActive, setIsCustomSubCatActive] = useState(false);
   const [customSubCatInput, setCustomSubCatInput] = useState("");
+  const [newIncludeInput, setNewIncludeInput] = useState("");
+  const [newProcessInput, setNewProcessInput] = useState("");
+  const [newImageInput, setNewImageInput] = useState("");
+  const [newReviewerName, setNewReviewerName] = useState("");
+  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [newReviewComment, setNewReviewComment] = useState("");
+  const [newReviewDate, setNewReviewDate] = useState("2 days ago");
   const [serviceForm, setServiceForm] = useState({
     title: "",
-    category: "Birthday",
+    category: "Birthday Decor",
     subCategory: "Wall Decor",
+    decorShape: "Wall Decor",
     price: "",
     originalPrice: "",
-    discount: "25% OFF",
-    rating: "4.8",
-    image: "/images/birthday_decor.png",
+    discount: "",
+    rating: "4.9",
+    image: "",
+    images: [],
+    customisableNote: "",
+    includes: [],
+    serviceProcess: [],
+    reviews: []
   });
 
   // Slider Form Modal State
@@ -140,11 +156,57 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Handle Cloudinary Multiple Files Upload
+  const handleMultipleFilesUpload = async (e, callback) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const uploadedUrls = [];
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("resource_type", "image");
+
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (data.url) {
+          uploadedUrls.push(data.url);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        callback(uploadedUrls);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error uploading images");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   // Submit Service Form (Add or Edit)
   const handleSaveService = async (e) => {
     e.preventDefault();
+    const finalDecorShape = serviceForm.decorShape || serviceForm.subCategory || "Wall Decor";
+    const finalImages = (serviceForm.images && serviceForm.images.length > 0)
+      ? serviceForm.images
+      : [serviceForm.image || "/images/birthday_decor.png"];
+
     const payload = {
       ...serviceForm,
+      image: finalImages[0] || serviceForm.image || "/images/birthday_decor.png",
+      decorShape: finalDecorShape,
+      images: finalImages,
+      customisableNote: serviceForm.customisableNote || "Balloon Colour & Design are customisable",
+      includes: serviceForm.includes || [],
+      serviceProcess: serviceForm.serviceProcess || [],
       price: Number(serviceForm.price) || 2999,
       originalPrice: Number(serviceForm.originalPrice) || 3999,
       rating: Number(serviceForm.rating) || 4.8,
@@ -270,7 +332,7 @@ export default function AdminDashboardPage() {
           {/* Separate Navigation Sections */}
           <div className="space-y-3">
             <div className="text-[10px] uppercase font-extrabold tracking-widest text-brand-pink/50 px-3 mb-1">
-              Section 1: Home Packages
+              Section 1: Decoration Packages
             </div>
 
             <button
@@ -286,7 +348,7 @@ export default function AdminDashboardPage() {
             >
               <div className="flex items-center space-x-3">
                 <LayoutGrid className="h-4 w-4" />
-                <span>Home Catalog Packages</span>
+                <span>Create Decoration Packages</span>
               </div>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
                 activeTab === "services" ? "bg-brand-plum text-brand-gold" : "bg-white/10 text-white"
@@ -296,33 +358,33 @@ export default function AdminDashboardPage() {
             </button>
 
             <div className="text-[10px] uppercase font-extrabold tracking-widest text-brand-pink/50 px-3 pt-2 mb-1">
-              Section 2: Hero Promotional Sliders
+              Section 2: Hero Background Video
             </div>
 
             <button
               onClick={() => {
-                setActiveTab("sliders");
+                setActiveTab("hero-video");
                 setMobileSidebarOpen(false);
               }}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
-                activeTab === "sliders"
+                activeTab === "hero-video"
                   ? "bg-brand-gold text-brand-plum shadow-lg font-black scale-102"
                   : "bg-white/5 text-white/80 hover:bg-white/15 hover:text-white"
               }`}
             >
               <div className="flex items-center space-x-3">
-                <Sliders className="h-4 w-4" />
-                <span>Hero Top Banners</span>
+                <Film className="h-4 w-4" />
+                <span>Hero Video Studio</span>
               </div>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                activeTab === "sliders" ? "bg-brand-plum text-brand-gold" : "bg-white/10 text-white"
+                activeTab === "hero-video" ? "bg-brand-plum text-brand-gold" : "bg-white/10 text-white"
               }`}>
-                {(heroSliders || []).length}
+                LIVE
               </span>
             </button>
 
             <div className="text-[10px] uppercase font-extrabold tracking-widest text-brand-pink/50 px-3 pt-2 mb-1">
-              Section 3: Gallery Page
+              Section 3: Our Recent Projects
             </div>
 
             <button
@@ -338,7 +400,7 @@ export default function AdminDashboardPage() {
             >
               <div className="flex items-center space-x-3">
                 <ImageIcon className="h-4 w-4" />
-                <span>Gallery Photos & Reels</span>
+                <span>Our Recent Projects</span>
               </div>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
                 activeTab === "gallery" ? "bg-brand-plum text-brand-gold" : "bg-white/10 text-white"
@@ -445,18 +507,26 @@ export default function AdminDashboardPage() {
               <h1 className="font-serif font-black text-xl sm:text-2xl text-brand-plum leading-none flex items-center space-x-2">
                 <span>
                   {activeTab === "services" 
-                    ? "Home Page Decoration Packages" 
-                    : activeTab === "sliders"
-                    ? "Hero Top Promotional Sliders"
-                    : "Gallery Page Portfolio (Photos & Reels)"}
+                    ? "Create Decoration Packages" 
+                    : activeTab === "hero-video"
+                    ? "Hero Background Video Studio"
+                    : activeTab === "categories"
+                    ? "Hero Category Posters"
+                    : activeTab === "bookings"
+                    ? "Customer Orders & Inquiries"
+                    : "Our Recent Projects Studio (Photos & Videos)"}
                 </span>
               </h1>
               <p className="text-xs text-gray-500 font-sans mt-0.5">
                 {activeTab === "services"
-                  ? `Manage all ${services.length} Home Catalog packages and subcategories`
-                  : activeTab === "sliders"
-                  ? `Manage all ${(heroSliders || []).length} top promotional slider banners`
-                  : `Manage all ${galleryItems.length} Gallery Page photos and video reels`}
+                  ? `Manage all ${services.length} Decoration packages and subcategories`
+                  : activeTab === "hero-video"
+                  ? "Upload or change active hero background video file across desktop and mobile"
+                  : activeTab === "categories"
+                  ? "Manage main home page category posters and images"
+                  : activeTab === "bookings"
+                  ? "Manage customer booking requests and location details"
+                  : `Upload, Edit, Update or Delete all ${galleryItems.length} Recent Project Photos & Setup Videos`}
               </p>
             </div>
           </div>
@@ -490,13 +560,19 @@ export default function AdminDashboardPage() {
                   setEditingService(null);
                   setServiceForm({
                     title: "",
-                    category: "Birthday",
+                    category: "Birthday Decor",
                     subCategory: "Wall Decor",
+                    decorShape: "Wall Decor",
                     price: "",
                     originalPrice: "",
-                    discount: "25% OFF",
-                    rating: "4.8",
-                    image: "/images/birthday_decor.png",
+                    discount: "",
+                    rating: "4.9",
+                    image: "",
+                    images: [],
+                    customisableNote: "",
+                    includes: [],
+                    serviceProcess: [],
+                    reviews: []
                   });
                   setServiceModalOpen(true);
                 } else if (activeTab === "sliders") {
@@ -524,7 +600,7 @@ export default function AdminDashboardPage() {
             >
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">
-                Add New {activeTab === "services" ? "Home Package" : activeTab === "sliders" ? "Hero Slider" : "Gallery Item"}
+                Add New {activeTab === "services" ? "Decoration Package" : activeTab === "sliders" ? "Hero Slider" : "Recent Project"}
               </span>
               <span className="sm:hidden">Add</span>
             </button>
@@ -532,42 +608,7 @@ export default function AdminDashboardPage() {
           </div>
         </header>
 
-        {/* Subcategory Filter Strip — ONLY for Home Catalog Packages Section */}
-        {activeTab === "services" && (
-          <div className="bg-white border-b border-gray-150 px-4 sm:px-8 py-3 flex items-center space-x-2 overflow-x-auto scroll-bar-remove">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider font-sans mr-2 flex items-center shrink-0">
-              <Filter className="h-3.5 w-3.5 mr-1 text-brand-gold" /> Filter Subcategory:
-            </span>
-            {subCategoriesList.map((sub) => {
-              const isSelected = selectedSubCatFilter === sub;
-              return (
-                <button
-                  key={sub}
-                  onClick={() => setSelectedSubCatFilter(sub)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap font-sans shrink-0 ${
-                    isSelected
-                      ? "bg-brand-plum text-white shadow-sm scale-105"
-                      : "bg-gray-100 text-brand-plum/70 hover:bg-gray-200"
-                  }`}
-                >
-                  {sub}
-                </button>
-              );
-            })}
 
-            <button
-              onClick={() => {
-                setNewSubCatName("");
-                setSubCatModalOpen(true);
-              }}
-              className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-brand-gold/20 text-brand-plum border border-brand-gold/40 hover:bg-brand-gold hover:text-brand-plum transition-all cursor-pointer whitespace-nowrap font-sans shrink-0 flex items-center space-x-1"
-              title="Manage & Add Subcategories"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span>Add Subcategory</span>
-            </button>
-          </div>
-        )}
 
         {/* Content Body Grid */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6">
@@ -620,7 +661,17 @@ export default function AdminDashboardPage() {
                           <button
                             onClick={() => {
                               setEditingService(service);
-                              setServiceForm(service);
+                              setServiceForm({
+                                ...service,
+                                decorShape: service.decorShape || service.subCategory || "Wall Decor",
+                                includes: (service.includes && service.includes.length > 0) ? service.includes : [],
+                                serviceProcess: (service.serviceProcess && service.serviceProcess.length > 0) ? service.serviceProcess : [],
+                                images: (service.images && service.images.length > 0) ? service.images : (service.image ? [service.image] : []),
+                                reviews: (service.reviews && service.reviews.length > 0) ? service.reviews : [
+                                  { id: "rev-1", reviewerName: "Sneha Reddy", rating: 5, comment: "Absolutely loved this decoration setup! The balloons were vibrant, sturdy, and lasted for days. The crew arrived right on time.", date: "2 days ago" },
+                                  { id: "rev-2", reviewerName: "Rahul Verma", rating: 5, comment: "Theme matching was 100% accurate to what was promised. Photobooth area looked extremely luxurious in our family portraits!", date: "1 week ago" }
+                                ]
+                              });
                               setServiceModalOpen(true);
                             }}
                             className="flex items-center space-x-1 px-3.5 py-2 rounded-xl bg-white border border-gray-200 hover:border-brand-gold hover:bg-brand-gold/10 text-brand-plum transition-all cursor-pointer shadow-sm text-xs font-bold"
@@ -661,60 +712,122 @@ export default function AdminDashboardPage() {
             </>
           )}
 
-          {/* SECTION 2: HERO PROMOTIONAL SLIDERS */}
-          {activeTab === "sliders" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredSliders.map((slider) => (
-                <div
-                  key={slider.id}
-                  className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
-                >
-                  {/* Slider Preview Banner */}
-                  <div
-                    className="p-6 text-white relative flex flex-col justify-center min-h-[160px]"
-                    style={{ background: slider.gradient }}
-                  >
-                    <span className="text-white/70 text-[10px] font-black uppercase tracking-widest font-sans mb-1">
-                      {slider.tag}
-                    </span>
-                    <h3 className="font-sans font-black text-2xl leading-tight drop-shadow-sm">
-                      {slider.title}
-                    </h3>
-                    <p className="text-xs text-white/80 font-sans mt-2">
-                      {slider.subtitle || "Decor Dazzlers · Hyderabad"}
-                    </p>
-                  </div>
-
-                  {/* Slider Details & Controls */}
-                  <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                    <span className="text-[11px] text-gray-400 font-mono">ID: {slider.id}</span>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => {
-                          setEditingSlider(slider);
-                          setSliderForm(slider);
-                          setSliderModalOpen(true);
-                        }}
-                        className="flex items-center space-x-1 px-3.5 py-2 rounded-xl bg-white border border-gray-200 hover:border-brand-gold hover:bg-brand-gold/10 text-brand-plum transition-all cursor-pointer shadow-sm text-xs font-bold"
-                      >
-                        <Edit3 className="h-3.5 w-3.5" />
-                        <span>Edit Slider</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (confirm(`Are you sure you want to delete slider "${slider.title}"?`)) {
-                            deleteHeroSlider(slider.id);
-                          }
-                        }}
-                        className="flex items-center space-x-1 px-3.5 py-2 rounded-xl bg-red-50 border border-red-200 hover:bg-red-500 hover:text-white text-red-500 transition-all cursor-pointer shadow-sm text-xs font-bold"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        <span>Delete</span>
-                      </button>
+          {/* SECTION 2: HERO BACKGROUND VIDEO MANAGEMENT */}
+          {activeTab === "hero-video" && (
+            <div className="max-w-4xl mx-auto space-y-6">
+              {/* Header card */}
+              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm space-y-4">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-3 bg-brand-plum text-brand-gold rounded-2xl">
+                      <Film className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h2 className="font-serif font-black text-xl text-brand-plum">
+                        Hero Section Video Control
+                      </h2>
+                      <p className="text-xs text-gray-500 font-sans mt-0.5">
+                        Upload or link a new hero background video that plays on mobile & desktop hero section.
+                      </p>
                     </div>
                   </div>
+                  <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full font-mono">
+                    Active Status: LIVE
+                  </span>
                 </div>
-              ))}
+
+                {heroVideoSavedMessage && (
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between animate-fadeIn font-sans">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span>{heroVideoSavedMessage}</span>
+                    </div>
+                    <button onClick={() => setHeroVideoSavedMessage("")} className="text-green-800 hover:text-black">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Live Video Preview Box */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-brand-plum font-sans">
+                    Current Active Video Preview
+                  </label>
+                  <div className="relative rounded-2xl overflow-hidden bg-black aspect-video max-h-[340px] shadow-lg border border-gray-800 flex items-center justify-center">
+                    <video
+                      key={heroVideoUrl}
+                      src={heroVideoUrl || "/hero_video.mp4"}
+                      controls
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover max-h-[340px]"
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-400 font-mono">
+                    Current URL: {heroVideoUrl || "/hero_video.mp4"}
+                  </p>
+                </div>
+
+                {/* Update Video Controls */}
+                <div className="pt-4 border-t border-gray-100 space-y-4 font-sans">
+                  
+                  {/* File Upload Option */}
+                  <div>
+                    <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider mb-2">
+                      Upload Video File (.mp4, .webm, .mov)
+                    </label>
+                    <div className="flex items-center space-x-3">
+                      <label className={`flex-1 flex items-center justify-center space-x-2 border-2 border-dashed border-brand-gold/40 hover:border-brand-gold bg-brand-cream/30 hover:bg-brand-cream/60 p-4 rounded-2xl cursor-pointer transition-all ${
+                        isUploading ? "opacity-50 pointer-events-none" : ""
+                      }`}>
+                        {isUploading ? (
+                          <>
+                            <RefreshCw className="h-5 w-5 text-brand-plum animate-spin" />
+                            <span className="text-xs font-bold text-brand-plum">Uploading Video to CDN...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-5 w-5 text-brand-gold" />
+                            <span className="text-xs font-bold text-brand-plum">Choose Video File from PC</span>
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="video/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            handleFileUpload(e, "video", (uploadedUrl) => {
+                              updateHeroVideoUrl(uploadedUrl);
+                              setHeroVideoSavedMessage("New hero video successfully uploaded and published live!");
+                            });
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Reset Control */}
+                  <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                    <span className="text-xs text-gray-500 font-sans">
+                      Need to restore original default video?
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateHeroVideoUrl("/hero_video.mp4");
+                        setHeroVideoSavedMessage("Hero video reset to default (/hero_video.mp4).");
+                      }}
+                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                    >
+                      Reset to Default Video
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
             </div>
           )}
 
@@ -1043,11 +1156,22 @@ export default function AdminDashboardPage() {
                             </div>
 
                             {b.selectedTheme && b.selectedTheme !== "General Inquiry" && (
-                              <div className="pt-1">
+                              <div className="pt-1 space-y-1">
                                 <span className="text-xs text-gray-400 block">Selected Package:</span>
-                                <span className="font-bold text-xs text-brand-plum font-serif">
+                                <span className="font-bold text-xs text-brand-plum font-serif block">
                                   {b.selectedTheme}
                                 </span>
+                                {b.packageUrl && (
+                                  <a
+                                    href={b.packageUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center space-x-1 text-[11px] font-bold text-brand-gold hover:underline bg-brand-plum text-white px-2.5 py-1 rounded-lg shadow-xs mt-1"
+                                  >
+                                    <ExternalLink className="h-3 w-3 text-brand-gold" />
+                                    <span>View Package Page 🔗</span>
+                                  </a>
+                                )}
                               </div>
                             )}
                           </div>
@@ -1195,17 +1319,24 @@ export default function AdminDashboardPage() {
       {/* SERVICE MODAL (ADD / EDIT HOME PACKAGE) */}
       {serviceModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-brand-gold/30">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-              <h3 className="font-serif text-xl font-black text-brand-plum">
-                {editingService ? "Edit Home Catalog Package" : "Add New Home Package"}
-              </h3>
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-brand-gold/30 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4 sticky top-0 bg-white z-10">
+              <div>
+                <h3 className="font-serif text-xl font-black text-brand-plum">
+                  {editingService ? "Edit Home Catalog Package" : "Add New Home Package"}
+                </h3>
+                <p className="text-xs text-gray-500 font-sans mt-0.5">
+                  Configure package details, decor shape, service process steps, and inclusions.
+                </p>
+              </div>
               <button onClick={() => setServiceModalOpen(false)} className="p-2 text-gray-400 hover:text-brand-plum rounded-full hover:bg-gray-100">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveService} className="space-y-4 font-sans">
+            <form onSubmit={handleSaveService} className="space-y-5 font-sans">
+              
+              {/* 1. Basic Info */}
               <div>
                 <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider mb-1.5">
                   Package Title
@@ -1216,70 +1347,110 @@ export default function AdminDashboardPage() {
                   value={serviceForm.title}
                   onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })}
                   placeholder="e.g. Rosegold Chrome Arch Birthday Decor"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs text-brand-plum focus:border-brand-gold focus:outline-none"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs text-brand-plum focus:border-brand-gold focus:outline-none font-bold"
                 />
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider">
-                    Subcategory (Shape Chip)
+              {/* 2. Celebration Category & Decor Shape Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                {/* Celebration Category Dropdown */}
+                <div>
+                  <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider mb-1.5">
+                    Celebration Category
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsCustomSubCatActive(!isCustomSubCatActive);
-                      if (!isCustomSubCatActive) {
-                        setCustomSubCatInput("");
-                      }
-                    }}
-                    className="text-[11px] font-bold text-brand-gold hover:underline cursor-pointer flex items-center space-x-1"
+                  <select
+                    value={serviceForm.category || "Birthday Decor"}
+                    onChange={(e) => setServiceForm({ ...serviceForm, category: e.target.value })}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs text-brand-plum focus:border-brand-gold focus:outline-none font-bold cursor-pointer"
                   >
-                    <Plus className="h-3 w-3" />
-                    <span>{isCustomSubCatActive ? "Select Existing Subcategory" : "+ Create New Subcategory"}</span>
-                  </button>
+                    <option value="Birthday Decor">Birthday Decor</option>
+                    <option value="Baby Welcome">Baby Welcome</option>
+                    <option value="Kid's Party">Kid's Party</option>
+                    <option value="Anniversary">Anniversary</option>
+                    <option value="Baby Shower">Baby Shower</option>
+                    <option value="Stage & Wedding">Stage & Wedding</option>
+                    <option value="House Warming">House Warming</option>
+                    <option value="Festival Decor">Festival Decor</option>
+                    <option value="Car Decor">Car Decor</option>
+                    <option value="Something Else">Something Else</option>
+                  </select>
                 </div>
 
-                {!isCustomSubCatActive ? (
-                  <select
-                    value={serviceForm.subCategory}
-                    onChange={(e) => {
-                      if (e.target.value === "__NEW_SUBCAT__") {
-                        setIsCustomSubCatActive(true);
-                        setCustomSubCatInput("");
-                      } else {
-                        setServiceForm({ ...serviceForm, subCategory: e.target.value });
-                      }
-                    }}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs text-brand-plum focus:border-brand-gold focus:outline-none font-bold text-brand-plum"
-                  >
-                    {availableSubCategories.map((sc) => (
-                      <option key={sc} value={sc}>
-                        {sc}
-                      </option>
-                    ))}
-                    <option value="__NEW_SUBCAT__">+ Add New Custom Subcategory...</option>
-                  </select>
-                ) : (
-                  <div className="space-y-1.5">
+                {/* Decor Shape Filter Dropdown / Custom Input */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider">
+                      Decor Shape Filter
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCustomSubCatActive(!isCustomSubCatActive);
+                        if (!isCustomSubCatActive) {
+                          setCustomSubCatInput("");
+                        }
+                      }}
+                      className="text-[11px] font-bold text-brand-gold hover:underline cursor-pointer flex items-center space-x-1"
+                    >
+                      <Plus className="h-3 w-3" />
+                      <span>{isCustomSubCatActive ? "Select Existing" : "+ New Shape"}</span>
+                    </button>
+                  </div>
+
+                  {!isCustomSubCatActive ? (
+                    <select
+                      value={serviceForm.decorShape || serviceForm.subCategory || "Wall Decor"}
+                      onChange={(e) => {
+                        if (e.target.value === "__NEW_SUBCAT__") {
+                          setIsCustomSubCatActive(true);
+                          setCustomSubCatInput("");
+                        } else {
+                          setServiceForm({ 
+                            ...serviceForm, 
+                            subCategory: e.target.value,
+                            decorShape: e.target.value
+                          });
+                        }
+                      }}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs text-brand-plum focus:border-brand-gold focus:outline-none font-bold cursor-pointer"
+                    >
+                      <option value="Wall Decor">Wall Decor</option>
+                      <option value="Ring Stand">Ring Stand</option>
+                      <option value="Room Decor">Room Decor</option>
+                      <option value="Stage Backdrop">Stage Backdrop</option>
+                      <option value="Table/Car Decor">Table/Car Decor</option>
+                      {availableSubCategories
+                        .filter((sc) => !["Wall Decor", "Ring Stand", "Room Decor", "Stage Backdrop", "Table/Car Decor"].includes(sc))
+                        .map((sc) => (
+                          <option key={sc} value={sc}>
+                            {sc}
+                          </option>
+                        ))}
+                      <option value="__NEW_SUBCAT__">+ Add New Custom Decor Shape...</option>
+                    </select>
+                  ) : (
                     <input
                       type="text"
                       required
                       value={customSubCatInput}
                       onChange={(e) => {
                         setCustomSubCatInput(e.target.value);
-                        setServiceForm({ ...serviceForm, subCategory: e.target.value });
+                        setServiceForm({ 
+                          ...serviceForm, 
+                          subCategory: e.target.value,
+                          decorShape: e.target.value
+                        });
                       }}
-                      placeholder="e.g. Balloon Canopy, Terrace Setup, Neon Arch"
-                      className="w-full bg-white border-2 border-brand-gold rounded-xl px-4 py-3 text-xs text-brand-plum focus:outline-none font-bold shadow-sm"
+                      placeholder="e.g. Terrace Canopy, Entrance Arch"
+                      className="w-full bg-white border-2 border-brand-gold rounded-xl px-4 py-3 text-xs text-brand-plum focus:outline-none font-bold"
                     />
-                    <p className="text-[10px] text-gray-500 font-sans">
-                      This new subcategory will automatically appear as a filter chip on both the home page and admin panel.
-                    </p>
-                  </div>
-                )}
+                  )}
+                </div>
+
               </div>
 
+              {/* 3. Pricing Grid */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider mb-1.5">
@@ -1308,34 +1479,396 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Image Upload */}
-              <div>
-                <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider mb-1.5">
-                  Package Image
-                </label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={serviceForm.image}
-                    onChange={(e) => setServiceForm({ ...serviceForm, image: e.target.value })}
-                    placeholder="/images/birthday_decor.png or Image URL"
-                    className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-xs text-brand-plum focus:border-brand-gold focus:outline-none"
-                  />
-                  <label className="bg-brand-plum text-white px-4 py-3 rounded-xl text-xs font-bold cursor-pointer hover:bg-brand-plum/90 flex items-center space-x-1.5 shadow-sm">
+              {/* 4. Multiple Images & Slides Gallery Manager */}
+              <div className="space-y-3 bg-amber-50/50 p-4 rounded-2xl border border-amber-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider">
+                      Package Slides & Decoration Images
+                    </label>
+                    <p className="text-[10px] text-gray-500 font-sans">
+                      Upload multiple images to showcase different angles & setups for this package slider.
+                    </p>
+                  </div>
+                  <span className="text-xs font-black text-brand-plum bg-amber-200/60 px-2.5 py-1 rounded-full border border-amber-300">
+                    {(serviceForm.images && serviceForm.images.length > 0 ? serviceForm.images.length : (serviceForm.image ? 1 : 0))} Images
+                  </span>
+                </div>
+
+                {/* Upload Buttons Row */}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <label className="bg-brand-plum hover:bg-brand-plum/90 text-white px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer flex items-center space-x-1.5 shadow-sm">
                     <Upload className="h-4 w-4 text-brand-gold" />
-                    <span>Upload Image</span>
+                    <span>Upload Multiple Images (Select Files)</span>
                     <input
                       type="file"
                       accept="image/*"
+                      multiple
                       className="hidden"
-                      onChange={(e) => handleFileUpload(e, "image", (url) => setServiceForm((prev) => ({ ...prev, image: url })))}
+                      onChange={(e) => handleMultipleFilesUpload(e, (urls) => {
+                        setServiceForm((prev) => {
+                          const existing = prev.images && prev.images.length > 0 ? prev.images : [prev.image || urls[0]];
+                          const combined = Array.from(new Set([...existing, ...urls]));
+                          return {
+                            ...prev,
+                            image: prev.image || combined[0],
+                            images: combined
+                          };
+                        });
+                      })}
                     />
                   </label>
                 </div>
-                {isUploading && <p className="text-[10px] text-brand-gold mt-1 animate-pulse font-bold">Uploading file...</p>}
+
+
+
+                {isUploading && <p className="text-[10px] text-brand-gold animate-pulse font-bold">Uploading files to cloud storage...</p>}
+
+                {/* Thumbnails Gallery Strip */}
+                {((serviceForm.images && serviceForm.images.length > 0) || (serviceForm.image && serviceForm.image.trim())) ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    {((serviceForm.images && serviceForm.images.length > 0)
+                      ? serviceForm.images
+                      : [serviceForm.image]
+                    ).map((imgUrl, idx) => {
+                      const isCover = (serviceForm.image === imgUrl) || idx === 0;
+                      return (
+                        <div key={idx} className={`relative rounded-xl overflow-hidden border-2 bg-black aspect-square group shadow-sm ${isCover ? "border-brand-gold ring-2 ring-brand-gold/30" : "border-gray-200"}`}>
+                          <img src={imgUrl} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
+                          
+                          {/* Cover Badge */}
+                          <div className="absolute top-1.5 left-1.5">
+                            {isCover ? (
+                              <span className="bg-brand-gold text-brand-plum text-[9px] font-black px-1.5 py-0.5 rounded shadow">
+                                COVER
+                              </span>
+                            ) : (
+                              <span className="bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
+                                #{idx + 1}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Action buttons on hover */}
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-1">
+                            {!isCover && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setServiceForm((prev) => {
+                                    const list = prev.images || [prev.image];
+                                    const updated = [imgUrl, ...list.filter((u) => u !== imgUrl)];
+                                    return { ...prev, image: imgUrl, images: updated };
+                                  });
+                                }}
+                                className="text-[9px] font-bold bg-brand-gold text-brand-plum px-2 py-1 rounded shadow cursor-pointer hover:scale-105 transition-transform"
+                              >
+                                Make Cover
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setServiceForm((prev) => {
+                                  const list = (prev.images && prev.images.length > 0) ? prev.images : (prev.image ? [prev.image] : []);
+                                  const updated = list.filter((_, i) => i !== idx);
+                                  return {
+                                    ...prev,
+                                    image: updated[0] || "",
+                                    images: updated
+                                  };
+                                });
+                              }}
+                              className="p-1 bg-red-600 text-white rounded-full hover:bg-red-700 cursor-pointer"
+                              title="Remove image slide"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-amber-300 rounded-2xl p-4 text-center text-xs text-amber-800 font-bold bg-white/70 font-sans">
+                    📷 No package photos uploaded yet. Select files above to upload decoration slides.
+                  </div>
+                )}
               </div>
 
-              <div className="pt-4 flex justify-end space-x-3 border-t border-gray-100">
+              {/* 5. Customisation Note / Badge Field */}
+              <div>
+                <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider mb-1.5">
+                  Customisation Note / Highlight Banner
+                </label>
+                <input
+                  type="text"
+                  value={serviceForm.customisableNote ?? ""}
+                  onChange={(e) => setServiceForm({ ...serviceForm, customisableNote: e.target.value })}
+                  placeholder="e.g. 🎈 Balloon Colour & Design are customisable"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs text-brand-plum focus:border-brand-gold focus:outline-none font-bold"
+                />
+              </div>
+
+              {/* 5. Package Inclusions ("Includes") Manager */}
+              <div className="space-y-2 bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider">
+                    Package Inclusions ("Includes")
+                  </label>
+                  <span className="text-[11px] font-bold text-brand-gold">
+                    {serviceForm.includes?.length || 0} Items
+                  </span>
+                </div>
+
+                {/* List of inclusions */}
+                <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                  {(serviceForm.includes || []).map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-gray-200 text-xs">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                        <span className="text-gray-800 font-medium">{item}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = serviceForm.includes.filter((_, i) => i !== idx);
+                          setServiceForm({ ...serviceForm, includes: updated });
+                        }}
+                        className="text-gray-400 hover:text-red-600 p-1 cursor-pointer"
+                        title="Remove Inclusion"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Add new inclusion input */}
+                <div className="flex items-center space-x-2 pt-1">
+                  <input
+                    type="text"
+                    value={newIncludeInput}
+                    onChange={(e) => setNewIncludeInput(e.target.value)}
+                    placeholder="e.g. 200+ Premium Latex Balloons, Fairy Lights"
+                    className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-brand-plum focus:border-brand-gold focus:outline-none"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (newIncludeInput.trim()) {
+                          setServiceForm({
+                            ...serviceForm,
+                            includes: [...(serviceForm.includes || []), newIncludeInput.trim()]
+                          });
+                          setNewIncludeInput("");
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newIncludeInput.trim()) {
+                        setServiceForm({
+                          ...serviceForm,
+                          includes: [...(serviceForm.includes || []), newIncludeInput.trim()]
+                        });
+                        setNewIncludeInput("");
+                      }
+                    }}
+                    className="px-3.5 py-2 bg-brand-gold text-brand-plum rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-brand-gold/90 transition-all shrink-0 cursor-pointer"
+                  >
+                    + Add Item
+                  </button>
+                </div>
+              </div>
+
+              {/* 6. Service Process Steps Manager */}
+              <div className="space-y-2 bg-purple-50/50 p-4 rounded-2xl border border-purple-100">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider">
+                    Service Process Steps
+                  </label>
+                  <span className="text-[11px] font-bold text-brand-plum">
+                    {serviceForm.serviceProcess?.length || 0} Steps
+                  </span>
+                </div>
+
+                {/* List of steps */}
+                <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                  {(serviceForm.serviceProcess || []).map((step, idx) => (
+                    <div key={idx} className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-gray-200 text-xs">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-bold text-[#2563EB] shrink-0">{idx + 1}.</span>
+                        <span className="text-gray-800 font-medium">{step}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = serviceForm.serviceProcess.filter((_, i) => i !== idx);
+                          setServiceForm({ ...serviceForm, serviceProcess: updated });
+                        }}
+                        className="text-gray-400 hover:text-red-600 p-1 cursor-pointer"
+                        title="Remove Step"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Add new process step input */}
+                <div className="flex items-center space-x-2 pt-1">
+                  <input
+                    type="text"
+                    value={newProcessInput}
+                    onChange={(e) => setNewProcessInput(e.target.value)}
+                    placeholder="e.g. Decorator arrives at your venue with setup materials"
+                    className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-brand-plum focus:border-brand-gold focus:outline-none"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (newProcessInput.trim()) {
+                          setServiceForm({
+                            ...serviceForm,
+                            serviceProcess: [...(serviceForm.serviceProcess || []), newProcessInput.trim()]
+                          });
+                          setNewProcessInput("");
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newProcessInput.trim()) {
+                        setServiceForm({
+                          ...serviceForm,
+                          serviceProcess: [...(serviceForm.serviceProcess || []), newProcessInput.trim()]
+                        });
+                        setNewProcessInput("");
+                      }
+                    }}
+                    className="px-3.5 py-2 bg-brand-plum text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-brand-plum/90 transition-all shrink-0 cursor-pointer"
+                  >
+                    + Add Step
+                  </button>
+                </div>
+              </div>
+
+              {/* 7. Package Customer Reviews Manager */}
+              <div className="space-y-3 bg-amber-50/60 p-4 rounded-2xl border border-amber-200/60 font-sans">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-brand-plum uppercase tracking-wider">
+                    Customer Ratings & Reviews
+                  </label>
+                  <span className="text-[11px] font-bold text-amber-800">
+                    {serviceForm.reviews?.length || 0} Reviews
+                  </span>
+                </div>
+
+                {/* List of current reviews for this package */}
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {(serviceForm.reviews || []).map((rev, idx) => (
+                    <div key={idx} className="bg-white p-3 rounded-xl border border-gray-200 space-y-1 text-xs relative group">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-bold text-brand-plum">{rev.reviewerName}</span>
+                          <span className="flex items-center gap-0.5 text-amber-600 font-extrabold text-[11px] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            {rev.rating} ★
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-[10px] text-gray-400 font-medium">{rev.date || "Verified"}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = (serviceForm.reviews || []).filter((_, i) => i !== idx);
+                              setServiceForm({ ...serviceForm, reviews: updated });
+                            }}
+                            className="text-gray-400 hover:text-red-600 p-1 cursor-pointer"
+                            title="Delete Review"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 italic text-[11px]">"{rev.comment}"</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Form to add a new review for this package */}
+                <div className="bg-white p-3.5 rounded-xl border border-amber-200 space-y-2.5">
+                  <p className="text-[11px] font-bold text-brand-plum uppercase tracking-wider">Add New Customer Review:</p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input
+                      type="text"
+                      value={newReviewerName}
+                      onChange={(e) => setNewReviewerName(e.target.value)}
+                      placeholder="Reviewer Name (e.g. Sneha Reddy)"
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-brand-plum font-medium"
+                    />
+                    
+                    <select
+                      value={newReviewRating}
+                      onChange={(e) => setNewReviewRating(Number(e.target.value))}
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-amber-700"
+                    >
+                      <option value={5}>5 Stars ★★★★★</option>
+                      <option value={4}>4 Stars ★★★★</option>
+                      <option value={3}>3 Stars ★★★</option>
+                      <option value={2}>2 Stars ★★</option>
+                      <option value={1}>1 Star ★</option>
+                    </select>
+
+                    <input
+                      type="text"
+                      value={newReviewDate}
+                      onChange={(e) => setNewReviewDate(e.target.value)}
+                      placeholder="Date (e.g. 2 days ago)"
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-brand-plum font-medium"
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={newReviewComment}
+                      onChange={(e) => setNewReviewComment(e.target.value)}
+                      placeholder="Review Comment (e.g. Stunning decoration, setup was fast and flawless!)"
+                      className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-brand-plum font-medium"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newReviewerName.trim() && newReviewComment.trim()) {
+                          const newRevObj = {
+                            id: `rev-${Date.now()}`,
+                            reviewerName: newReviewerName.trim(),
+                            rating: newReviewRating,
+                            comment: newReviewComment.trim(),
+                            date: newReviewDate.trim() || "Recently"
+                          };
+                          setServiceForm({
+                            ...serviceForm,
+                            reviews: [...(serviceForm.reviews || []), newRevObj]
+                          });
+                          setNewReviewerName("");
+                          setNewReviewComment("");
+                        }
+                      }}
+                      className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold shrink-0 cursor-pointer shadow-xs uppercase tracking-wider"
+                    >
+                      + Add Review
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit / Cancel Buttons */}
+              <div className="pt-4 flex justify-end space-x-3 border-t border-gray-100 sticky bottom-0 bg-white z-10">
                 <button
                   type="button"
                   onClick={() => setServiceModalOpen(false)}

@@ -6,11 +6,11 @@ export default function BookingCTA() {
   const { openBookingModal } = useApp();
 
   return (
-    <section className="py-12 bg-white relative overflow-hidden border-t border-gray-100">
+    <section className="py-8 md:py-14 lg:py-16 bg-brand-cream relative overflow-hidden border-t border-brand-rosegold/10">
       {/* Decorative Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-brand-gold/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center" data-aos="zoom-in">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
         <div className="bg-gray-50 border border-gray-100 rounded-3xl p-6 sm:p-10 md:p-12 shadow-sm">
 
           

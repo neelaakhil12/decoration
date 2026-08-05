@@ -4,7 +4,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BottomNav from "@/components/BottomNav";
 import FloatingActions from "@/components/FloatingActions";
-import CartDrawer from "@/components/CartDrawer";
 import LocationModal from "@/components/LocationModal";
 import BookingModal from "@/components/BookingModal";
 import { useApp } from "@/components/AppContext";
@@ -18,7 +17,6 @@ export default function MainLayoutWrapper({ children }) {
     selectLocation,
     searchQuery,
     setSearchQuery,
-    cartCount,
     isLocationOpen,
     setIsLocationOpen
   } = useApp();
@@ -38,18 +36,16 @@ export default function MainLayoutWrapper({ children }) {
         onOpenLocationModal={() => setIsLocationOpen(true)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        cartCount={cartCount}
       />
       
       {/* Account for header height and bottom mobile navigation height */}
-      <main className="flex-grow pt-[205px] md:pt-44 pb-16 md:pb-0 bg-white">
+      <main className="flex-grow pt-[135px] md:pt-38 pb-0 bg-brand-cream">
         {children}
       </main>
 
       <Footer />
       <FloatingActions />
-      <BottomNav cartCount={cartCount} />
-      <CartDrawer />
+      <BottomNav />
       <LocationModal
         isOpen={isLocationOpen}
         onClose={() => setIsLocationOpen(false)}

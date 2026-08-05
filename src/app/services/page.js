@@ -91,7 +91,7 @@ export default function ServicesPage() {
   return (
     <div className="bg-brand-cream min-h-screen">
       {/* Page Header */}
-      <section className="relative overflow-hidden bg-brand-plum text-brand-cream py-20">
+      <section className="relative overflow-hidden bg-brand-plum text-brand-cream py-8">
         <div className="absolute top-0 right-0 w-96 h-96 bg-brand-gold/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-rosegold/10 rounded-full blur-3xl pointer-events-none" />
         
@@ -112,7 +112,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Services Grid */}
-      <section className="py-20">
+      <section className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {allServices.map((service, index) => (

@@ -1,58 +1,36 @@
 "use client";
-import { useState } from "react";
-import { X, MapPin, Navigation, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, MapPin, Check } from "lucide-react";
 
 export default function LocationModal({ isOpen, onClose, currentLocation = {}, onSelectLocation }) {
-  const [isDetecting, setIsDetecting] = useState(false);
+  const [plotNo, setPlotNo] = useState("");
+  const [customAddressInput, setCustomAddressInput] = useState("");
+
+  useEffect(() => {
+    if (currentLocation?.address) {
+      setCustomAddressInput(currentLocation.address);
+    } else {
+      setCustomAddressInput("Chaitanya Hills, Hyderabad");
+    }
+  }, [currentLocation]);
 
   if (!isOpen) return null;
 
-  const handleDetectLocation = () => {
-    if (typeof window === "undefined" || !navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
+  const handleSaveCustomLocation = () => {
+    const plotPrefix = plotNo.trim() ? `Plot ${plotNo.trim().replace(/^plot\s*/i, "")}, ` : "";
+    let finalAddress = customAddressInput.trim();
+
+    if (!finalAddress) {
+      finalAddress = `${plotPrefix}Chaitanya Hills, Hyderabad`;
+    } else if (plotPrefix && !finalAddress.toLowerCase().includes("plot")) {
+      finalAddress = `${plotPrefix}${finalAddress}`;
     }
 
-    setIsDetecting(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.address) {
-              const city = data.address.city || data.address.town || data.address.village || data.address.state_district || "Hyderabad";
-              const area = data.address.suburb || data.address.neighbourhood || data.address.residential || data.address.road || city;
-              const fullAddress = `${area}, ${city}`;
-              
-              onSelectLocation({
-                city: city,
-                address: fullAddress
-              });
-              setIsDetecting(false);
-              onClose();
-              return;
-            }
-          }
-        } catch (err) {
-          console.error("Geocoding failed:", err);
-        }
-
-        // Fallback
-        onSelectLocation({
-          city: "Hyderabad",
-          address: `Pinned Location (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`
-        });
-        setIsDetecting(false);
-        onClose();
-      },
-      (error) => {
-        setIsDetecting(false);
-        alert("Unable to detect GPS position. Please ensure location access is enabled on your device.");
-      },
-      { timeout: 8000, enableHighAccuracy: true }
-    );
+    onSelectLocation({
+      city: "Hyderabad",
+      address: finalAddress,
+    });
+    onClose();
   };
 
   return (
@@ -61,7 +39,7 @@ export default function LocationModal({ isOpen, onClose, currentLocation = {}, o
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-sm bg-white border border-brand-gold/30 rounded-3xl overflow-hidden shadow-2xl flex flex-col animate-scale-in"
+        className="w-full max-w-md bg-white border border-brand-gold/30 rounded-3xl overflow-hidden shadow-2xl flex flex-col animate-scale-in max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -72,7 +50,7 @@ export default function LocationModal({ isOpen, onClose, currentLocation = {}, o
             </div>
             <div>
               <h3 className="font-serif text-base font-bold text-white">Pin Your Location</h3>
-              <p className="text-[11px] text-brand-pink/80">Get accurate setup & service availability</p>
+              <p className="text-[11px] text-brand-pink/80">Set exact plot, colony & area details</p>
             </div>
           </div>
           <button 
@@ -84,14 +62,14 @@ export default function LocationModal({ isOpen, onClose, currentLocation = {}, o
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 overflow-y-auto">
           
-          {/* Current active location */}
-          <div className="p-3.5 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-between">
+          {/* Current active location display */}
+          <div className="p-3.5 bg-brand-cream/50 border border-brand-gold/20 rounded-2xl flex items-center justify-between">
             <div className="flex items-center space-x-2.5">
               <MapPin className="h-4 w-4 text-brand-gold shrink-0" />
               <div className="text-left">
-                <p className="text-[9px] uppercase font-sans font-bold text-gray-400 tracking-wider">Current Location</p>
+                <p className="text-[9px] uppercase font-sans font-bold text-gray-400 tracking-wider">Active Pinned Location</p>
                 <p className="text-xs font-sans font-bold text-brand-plum leading-tight">
                   {currentLocation?.address || `${currentLocation?.city || "Hyderabad"} Metro`}
                 </p>
@@ -102,24 +80,45 @@ export default function LocationModal({ isOpen, onClose, currentLocation = {}, o
             </span>
           </div>
 
-          {/* GPS Auto-Detect & Pin Button */}
-          <button
-            onClick={handleDetectLocation}
-            disabled={isDetecting}
-            className="w-full p-4 bg-brand-plum hover:bg-brand-plum/90 text-white rounded-2xl flex items-center justify-center space-x-3 shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-75"
-          >
-            {isDetecting ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin text-brand-gold" />
-                <span className="text-xs font-bold font-sans tracking-wide">Detecting GPS Position...</span>
-              </>
-            ) : (
-              <>
-                <Navigation className="h-5 w-5 fill-current text-brand-gold" />
-                <span className="text-xs font-bold font-sans tracking-wide uppercase">Pin My Location</span>
-              </>
-            )}
-          </button>
+          {/* Plot & Exact Colony Address Form */}
+          <div className="space-y-3 pt-1">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="col-span-1 space-y-1">
+                <label className="block text-[10px] uppercase font-sans font-bold text-brand-plum/80">
+                  Plot / Flat No.
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Plot 42"
+                  value={plotNo}
+                  onChange={(e) => setPlotNo(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-brand-gold rounded-xl text-xs font-sans text-brand-plum focus:outline-none"
+                />
+              </div>
+
+              <div className="col-span-2 space-y-1">
+                <label className="block text-[10px] uppercase font-sans font-bold text-brand-plum/80">
+                  Colony / Street / Area
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Chaitanya Hills, Hyderabad"
+                  value={customAddressInput}
+                  onChange={(e) => setCustomAddressInput(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-brand-gold rounded-xl text-xs font-sans text-brand-plum focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSaveCustomLocation}
+              className="w-full bg-gold-gradient text-brand-plum py-2.5 rounded-xl font-sans text-xs tracking-wider uppercase font-bold shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+            >
+              <Check className="h-4 w-4" />
+              <span>Confirm & Pin Location</span>
+            </button>
+          </div>
 
         </div>
       </div>

@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { MapPin, Search, Phone, Menu, X, ChevronDown, ShoppingBag } from "lucide-react";
+import { Search, Phone, Menu, X, ChevronDown, ShoppingBag } from "lucide-react";
 import { useApp } from "@/components/AppContext";
 
 export default function Navbar({
@@ -13,15 +13,30 @@ export default function Navbar({
   cartCount = 0
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { setIsCartOpen, openBookingModal } = useApp();
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const { services, galleryItems, setIsCartOpen, openBookingModal } = useApp();
+
+  const allProducts = (services && services.length > 0) ? services : (galleryItems || []);
+  const searchResults = (searchQuery && searchQuery.trim().length > 0)
+    ? allProducts.filter((item) => {
+        const q = searchQuery.toLowerCase().trim();
+        const title = String(item.title || "").toLowerCase();
+        const category = String(item.category || "").toLowerCase();
+        const subCategory = String(item.subCategory || "").toLowerCase();
+        const decorShape = String(item.decorShape || "").toLowerCase();
+        return title.includes(q) || category.includes(q) || subCategory.includes(q) || decorShape.includes(q);
+      })
+    : [];
 
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Services", href: "/services" },
+    { name: "Our Packages", href: "/gallery" },
+    { name: "Recent Projects", href: "/recent-projects" },
     { name: "About Us", href: "/about" },
-    { name: "Gallery", href: "/gallery" },
     { name: "Contact", href: "/contact" },
   ];
 
@@ -79,33 +94,8 @@ export default function Navbar({
               })}
             </div>
 
-            {/* Right: Location + Cart + WhatsApp/Book */}
+            {/* Right: Book Now Button */}
             <div className="flex items-center gap-3 flex-shrink-0">
-              {/* Location pill */}
-              <div 
-                onClick={onOpenLocationModal}
-                className="flex items-center gap-1.5 bg-brand-cream border border-brand-gold/20 px-3 py-2 rounded-full cursor-pointer hover:border-brand-gold hover:shadow-sm transition-all"
-                title="Click to pin or change location"
-              >
-                <MapPin className="h-3.5 w-3.5 text-brand-gold flex-shrink-0" />
-                <span className="text-[11px] font-bold text-brand-plum font-sans whitespace-nowrap">
-                  {location?.city || "Hyderabad"}
-                </span>
-              </div>
-
-              {/* Shopping Cart Icon */}
-              <div 
-                onClick={() => setIsCartOpen(true)}
-                className="relative cursor-pointer p-2.5 border border-gray-150 rounded-full hover:bg-brand-gold/10 hover:border-brand-gold/40 transition-all group"
-              >
-                <ShoppingBag className="h-4 w-4 text-brand-plum group-hover:text-brand-gold" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-[9px] font-black h-4.5 w-4.5 flex items-center justify-center shadow-sm animate-pulse">
-                    {cartCount}
-                  </span>
-                )}
-              </div>
-
               {/* Book Button */}
               <button
                 onClick={() => openBookingModal()}
@@ -118,9 +108,9 @@ export default function Navbar({
 
           </div>
 
-          {/* Search Bar Row — desktop only */}
-          {pathname === "/" && (
-            <div className="pb-3 -mt-1">
+          {/* Search Bar Row — desktop & mobile accessible */}
+          {!pathname.startsWith("/admin") && (
+            <div className="pb-3 -mt-1 relative">
               <div className="relative max-w-lg mx-auto">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-plum/35 pointer-events-none" />
                 <input
@@ -128,10 +118,109 @@ export default function Navbar({
                   id="navbar-search"
                   placeholder="Search balloon art, birthday decor, stage setups..."
                   value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-brand-gold pl-11 pr-4 py-2.5 rounded-full text-[13px] text-brand-plum font-sans focus:outline-none focus:ring-2 focus:ring-brand-gold/20 shadow-inner"
+                  onFocus={() => setIsSearchFocused(true)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    onSearchChange(val);
+                    setIsSearchFocused(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setIsSearchFocused(false);
+                      if (pathname === "/") {
+                        const el = document.getElementById("gallery");
+                        if (el) el.scrollIntoView({ behavior: "smooth" });
+                      } else {
+                        router.push("/gallery");
+                      }
+                    }
+                  }}
+                  className="w-full bg-gray-50 border border-gray-200 focus:border-brand-gold pl-11 pr-10 py-2.5 rounded-full text-[13px] text-brand-plum font-sans focus:outline-none focus:ring-2 focus:ring-brand-gold/20 shadow-inner"
                   autoComplete="off"
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      onSearchChange("");
+                      setIsSearchFocused(false);
+                    }}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-brand-plum rounded-full cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+
+                {/* Floating Live Search Dropdown */}
+                {searchQuery.trim().length > 0 && isSearchFocused && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 animate-fade-in max-h-96 overflow-y-auto">
+                    <div className="p-3 bg-brand-cream/80 border-b border-gray-150 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-brand-plum uppercase tracking-wider font-sans">
+                        Search Results ({searchResults.length})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSearchFocused(false);
+                          if (pathname === "/") {
+                            const el = document.getElementById("gallery");
+                            if (el) el.scrollIntoView({ behavior: "smooth" });
+                          } else {
+                            router.push("/gallery");
+                          }
+                        }}
+                        className="text-[11px] font-bold text-[#2563EB] hover:underline flex items-center gap-1 cursor-pointer font-sans"
+                      >
+                        <span>View All Packages</span>
+                        <ChevronDown className="h-3 w-3 -rotate-90" />
+                      </button>
+                    </div>
+
+                    {searchResults.length > 0 ? (
+                      <div className="divide-y divide-gray-100">
+                        {searchResults.slice(0, 6).map((product) => {
+                          const slugTitle = (product.title || "decoration-package").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+                          return (
+                            <Link
+                              key={product.id}
+                              href={`/products/decor/${product.id}/${slugTitle}`}
+                              onClick={() => {
+                                setIsSearchFocused(false);
+                              }}
+                              className="p-3 flex items-center space-x-3 hover:bg-blue-50/60 transition-colors group cursor-pointer text-left"
+                            >
+                              <img
+                                src={product.image || "/images/birthday_decor.png"}
+                                alt={product.title}
+                                className="h-11 w-11 rounded-xl object-cover border border-gray-200 shrink-0"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-xs font-bold text-gray-900 group-hover:text-[#2563EB] truncate font-sans">
+                                  {product.title}
+                                </h4>
+                                <div className="flex items-center space-x-2 text-[10px] text-gray-500 font-sans mt-0.5">
+                                  <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">
+                                    {product.decorShape || product.subCategory || "Wall Decor"}
+                                  </span>
+                                  <span>{product.category || "Decoration"}</span>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <span className="text-xs font-black text-[#2563EB] font-sans">
+                                  ₹{product.price || 3499}
+                                </span>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="p-5 text-center text-xs text-gray-500 font-sans">
+                        No packages found for "<strong className="text-brand-plum">{searchQuery}</strong>". Try searching <em>birthday, stage, balloon, wall decor</em>.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -156,19 +245,6 @@ export default function Navbar({
             </Link>
 
             <div className="flex items-center gap-2">
-              {/* Shopping Cart - mobile */}
-              <div 
-                onClick={() => setIsCartOpen(true)}
-                className="relative cursor-pointer p-1.5 border border-gray-200 rounded-full bg-white"
-              >
-                <ShoppingBag className="h-4 w-4 text-brand-plum" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-[8px] font-bold h-3.5 w-3.5 flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </div>
-
               <button
                 onClick={() => openBookingModal()}
                 className="bg-brand-plum text-white px-3 py-1.5 rounded-full font-sans text-[10px] tracking-wider uppercase font-bold cursor-pointer"
@@ -178,9 +254,9 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Row 2: Search bar */}
-          {pathname === "/" && (
-            <div className="w-full">
+          {/* Row 2: Search bar for mobile */}
+          {!pathname.startsWith("/admin") && (
+            <div className="w-full relative">
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-plum/35 pointer-events-none" />
                 <input
@@ -188,27 +264,108 @@ export default function Navbar({
                   id="mobile-search"
                   placeholder="Search balloon, birthday, floral..."
                   value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-brand-gold pl-10 pr-4 py-2.5 rounded-xl text-[13px] text-brand-plum font-sans focus:outline-none focus:ring-1 focus:ring-brand-gold"
+                  onFocus={() => setIsSearchFocused(true)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    onSearchChange(val);
+                    setIsSearchFocused(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setIsSearchFocused(false);
+                      if (pathname === "/") {
+                        const el = document.getElementById("gallery");
+                        if (el) el.scrollIntoView({ behavior: "smooth" });
+                      } else {
+                        router.push("/gallery");
+                      }
+                    }
+                  }}
+                  className="w-full bg-gray-50 border border-gray-200 focus:border-brand-gold pl-10 pr-9 py-2.5 rounded-xl text-[13px] text-brand-plum font-sans focus:outline-none focus:ring-1 focus:ring-brand-gold"
                   autoComplete="off"
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      onSearchChange("");
+                      setIsSearchFocused(false);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-brand-plum rounded-full cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+
+                {/* Mobile Floating Live Search Dropdown */}
+                {searchQuery.trim().length > 0 && isSearchFocused && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 animate-fade-in max-h-80 overflow-y-auto">
+                    <div className="p-2.5 bg-brand-cream/80 border-b border-gray-150 flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-brand-plum uppercase tracking-wider font-sans">
+                        Results ({searchResults.length})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSearchFocused(false);
+                          if (pathname === "/") {
+                            const el = document.getElementById("gallery");
+                            if (el) el.scrollIntoView({ behavior: "smooth" });
+                          } else {
+                            router.push("/gallery");
+                          }
+                        }}
+                        className="text-[10px] font-bold text-[#2563EB] hover:underline cursor-pointer font-sans"
+                      >
+                        View All
+                      </button>
+                    </div>
+
+                    {searchResults.length > 0 ? (
+                      <div className="divide-y divide-gray-100">
+                        {searchResults.slice(0, 5).map((product) => {
+                          const slugTitle = (product.title || "decoration-package").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+                          return (
+                            <Link
+                              key={product.id}
+                              href={`/products/decor/${product.id}/${slugTitle}`}
+                              onClick={() => {
+                                setIsSearchFocused(false);
+                              }}
+                              className="p-2.5 flex items-center space-x-2.5 hover:bg-blue-50/60 transition-colors group cursor-pointer text-left"
+                            >
+                              <img
+                                src={product.image || "/images/birthday_decor.png"}
+                                alt={product.title}
+                                className="h-10 w-10 rounded-lg object-cover border border-gray-200 shrink-0"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-xs font-bold text-gray-900 group-hover:text-[#2563EB] truncate font-sans">
+                                  {product.title}
+                                </h4>
+                                <p className="text-[10px] text-gray-500 font-sans truncate">
+                                  {product.category} · {product.decorShape || "Wall Decor"}
+                                </p>
+                              </div>
+                              <span className="text-xs font-black text-[#2563EB] font-sans shrink-0">
+                                ₹{product.price || 3499}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="p-4 text-center text-xs text-gray-500 font-sans">
+                        No results for "{searchQuery}"
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* Row 3: Quick location info */}
-          <div 
-            onClick={onOpenLocationModal}
-            className="flex items-center justify-between text-[11px] text-brand-plum/70 font-sans py-1 border-b border-gray-100 cursor-pointer hover:bg-gray-50/80 rounded px-1 transition-all"
-            title="Click to pin or change location"
-          >
-            <div className="flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5 text-brand-gold flex-shrink-0" />
-              <span>
-                Serving <strong className="text-brand-plum font-bold underline decoration-brand-gold">{location?.address || location?.city || "Hyderabad"}</strong> · <strong className="text-brand-plum font-bold">Same Day Setup Available</strong>
-              </span>
-            </div>
-          </div>
+
         </div>
       </div>
 

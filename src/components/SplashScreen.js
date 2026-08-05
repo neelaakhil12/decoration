@@ -120,15 +120,12 @@ export default function SplashScreen() {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white transition-all duration-700 select-none overflow-hidden ${
-        fadeOut ? "opacity-0 scale-105 pointer-events-none" : "opacity-100 scale-100"
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white transition-opacity duration-700 select-none overflow-hidden ${
+        fadeOut ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >
       {/* Canvas for Confetti Explosion */}
       <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10" />
-
-      {/* Subtle Gold/Pink Shimmer Aura in background */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-pink-100/50 via-amber-100/40 to-blue-100/50 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-20 flex flex-col items-center justify-center p-6 text-center space-y-6 max-w-md mx-auto">
         
@@ -169,30 +166,24 @@ export default function SplashScreen() {
           </div>
         </div>
 
-        {/* ── 2. Logo & Brand Name Reveal (Crystal Clear Image) ── */}
+        {/* ── 2. Logo & Brand Name Reveal (100% Crystal Clear, 0 Blur) ── */}
         <div
-          className={`transition-all duration-700 ease-out transform space-y-4 ${
-            showLogo
-              ? "opacity-100 translate-y-0 scale-100"
-              : "opacity-0 translate-y-8 scale-95"
+          className={`transition-opacity duration-500 space-y-4 ${
+            showLogo ? "opacity-100" : "opacity-0"
           }`}
         >
-          {/* High Clarity Crisp Logo Image */}
+          {/* High Clarity Sharp Logo Image */}
           <div className="flex justify-center">
             <img
               src="/logo.png"
               alt="Decor Dazzlers Logo"
-              className="h-32 sm:h-44 w-auto object-contain shrink-0"
-              style={{ imageRendering: "crisp-edges" }}
+              className="h-36 sm:h-48 w-auto object-contain shrink-0 max-w-[85vw]"
             />
           </div>
 
-          {/* Brand Name & Tagline */}
-          <div className="space-y-1.5">
-            <h1 className="font-serif font-black text-3xl sm:text-4xl text-[#703A58] tracking-tight leading-none font-sans">
-              Decor <span className="text-[#2563EB] italic font-serif">Dazzlers</span>
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-700 font-sans tracking-wide font-extrabold flex items-center justify-center gap-1.5 pt-1">
+          {/* Tagline */}
+          <div className="space-y-1.5 pt-1">
+            <p className="text-xs sm:text-sm text-[#703A58] font-sans tracking-wide font-extrabold flex items-center justify-center gap-1.5">
               <Sparkles className="h-4 w-4 text-[#2563EB]" />
               <span>Hyderabad's Premium Party & Event Decorators</span>
               <Sparkles className="h-4 w-4 text-[#2563EB]" />

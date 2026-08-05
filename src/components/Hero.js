@@ -278,8 +278,8 @@ function PhoneAppUI({
         ))}
       </div>
 
-      {/* ── "Explore at a Glance" category chip strip ── */}
-      <div className="mt-3 flex-shrink-0">
+      {/* ── "Explore at a Glance" category chip strip (Hidden on mobile) ── */}
+      <div className="hidden md:block mt-3 flex-shrink-0">
         <div
           className="rounded-t-xl mx-2"
           style={{

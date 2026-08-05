@@ -6,6 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import FloatingActions from "@/components/FloatingActions";
 import LocationModal from "@/components/LocationModal";
 import BookingModal from "@/components/BookingModal";
+import SplashScreen from "@/components/SplashScreen";
 import { useApp } from "@/components/AppContext";
 
 export default function MainLayoutWrapper({ children }) {
@@ -31,6 +32,7 @@ export default function MainLayoutWrapper({ children }) {
 
   return (
     <>
+      <SplashScreen />
       <Navbar
         location={location}
         onOpenLocationModal={() => setIsLocationOpen(true)}

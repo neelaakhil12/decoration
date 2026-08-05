@@ -39,7 +39,7 @@ export default function SplashScreen() {
     };
   }, []);
 
-  // Party Popper HTML5 Canvas Particle Blast System
+  // Party Popper HTML5 Canvas Particle Blast System in Rich Gold Colors
   const triggerConfettiCannon = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -48,21 +48,22 @@ export default function SplashScreen() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const colors = ["#D4A64A", "#F472B6", "#9333EA", "#10B981", "#3B82F6", "#F59E0B", "#EC4899", "#FFFFFF"];
+    // All Royal Gold, Metallic Gold, Amber & Bright Sparkle Colors
+    const colors = ["#D4A64A", "#F59E0B", "#FCD34D", "#B45309", "#FEF08A", "#FFFFFF", "#EAB308", "#78350F"];
     const particles = [];
-    const particleCount = 120;
+    const particleCount = 130;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
     for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 12 + 6;
+      const speed = Math.random() * 13 + 6;
       particles.push({
         x: centerX,
         y: centerY,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed - 4,
-        size: Math.random() * 8 + 4,
+        size: Math.random() * 9 + 4,
         color: colors[Math.floor(Math.random() * colors.length)],
         rotation: Math.random() * 360,
         rotationSpeed: Math.random() * 10 - 5,
@@ -118,34 +119,34 @@ export default function SplashScreen() {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-[#1B061A] via-[#350F30] to-[#120313] transition-all duration-700 select-none overflow-hidden ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#3A2209] via-[#1F1103] to-[#0A0501] transition-all duration-700 select-none overflow-hidden ${
         fadeOut ? "opacity-0 scale-105 pointer-events-none" : "opacity-100 scale-100"
       }`}
     >
-      {/* Canvas for Confetti Explosion */}
+      {/* Canvas for Gold Confetti Explosion */}
       <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10" />
 
-      {/* Radial Gold Shimmer Glow in background */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-amber-400/20 via-pink-500/20 to-purple-600/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
+      {/* Radial Metallic Gold Shimmer Glow in background */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30rem] h-[30rem] bg-gradient-to-r from-amber-500/30 via-yellow-400/25 to-amber-600/30 rounded-full blur-3xl animate-pulse pointer-events-none" />
 
       <div className="relative z-20 flex flex-col items-center justify-center p-6 text-center space-y-6 max-w-md mx-auto">
         
-        {/* ── 1. Party Popper Icon Blast Animation ── */}
+        {/* ── 1. Party Popper Icon Blast Animation (Gold Theme) ── */}
         <div className="relative">
           {/* Shockwave Rings on Popper Blast */}
           {isPopped && (
             <>
-              <div className="absolute inset-0 rounded-full border-2 border-amber-400/80 animate-ping" />
-              <div className="absolute -inset-4 rounded-full border border-pink-400/50 animate-pulse" />
+              <div className="absolute inset-0 rounded-full border-2 border-amber-400 animate-ping" />
+              <div className="absolute -inset-4 rounded-full border border-yellow-300/60 animate-pulse" />
             </>
           )}
 
           <div
-            className={`p-5 rounded-3xl bg-white/10 backdrop-blur-md border border-amber-400/30 text-amber-400 shadow-2xl transition-all duration-500 flex items-center justify-center ${
-              isPopped ? "scale-125 rotate-12 bg-amber-400/20 text-amber-300" : "scale-100"
+            className={`p-6 rounded-3xl bg-amber-950/60 backdrop-blur-md border-2 border-amber-400/50 text-amber-400 shadow-[0_0_40px_rgba(245,158,11,0.35)] transition-all duration-500 flex items-center justify-center ${
+              isPopped ? "scale-125 rotate-12 bg-amber-400/20 text-amber-300 border-amber-300" : "scale-100"
             }`}
           >
-            <PartyPopper className={`h-12 w-12 sm:h-16 sm:w-16 transition-transform ${isPopped ? "animate-bounce" : ""}`} />
+            <PartyPopper className={`h-14 w-14 sm:h-16 sm:w-16 text-amber-400 transition-transform ${isPopped ? "animate-bounce" : ""}`} />
           </div>
 
           {/* Floating Emoji Pops */}
@@ -159,7 +160,7 @@ export default function SplashScreen() {
           )}
         </div>
 
-        {/* ── 2. Logo & Brand Name Reveal ── */}
+        {/* ── 2. Logo & Brand Name Reveal (Gold Theme) ── */}
         <div
           className={`transition-all duration-700 transform space-y-3 ${
             showLogo
@@ -172,30 +173,30 @@ export default function SplashScreen() {
             <img
               src="/logo.png"
               alt="Decor Dazzlers Logo"
-              className="h-28 sm:h-36 w-auto object-contain drop-shadow-[0_10px_25px_rgba(212,166,74,0.4)] animate-pulse"
+              className="h-28 sm:h-36 w-auto object-contain drop-shadow-[0_12px_30px_rgba(245,158,11,0.5)] animate-pulse"
             />
           </div>
 
-          {/* Brand Name */}
+          {/* Brand Name in Rich Royal Gold Metallic Gradient */}
           <div className="space-y-1">
-            <h1 className="font-serif font-black text-3xl sm:text-4xl text-white tracking-tight leading-none font-sans">
-              Decor <span className="text-brand-gold italic">Dazzlers</span>
+            <h1 className="font-serif font-black text-3xl sm:text-4xl text-amber-100 tracking-tight leading-none font-sans">
+              Decor <span className="text-amber-400 italic drop-shadow-[0_2px_10px_rgba(245,158,11,0.6)]">Dazzlers</span>
             </h1>
-            <p className="text-xs sm:text-sm text-brand-pink/90 font-sans tracking-wide font-medium flex items-center justify-center gap-1.5 pt-1">
-              <Sparkles className="h-3.5 w-3.5 text-brand-gold animate-spin" />
+            <p className="text-xs sm:text-sm text-amber-200/90 font-sans tracking-wide font-bold flex items-center justify-center gap-1.5 pt-1">
+              <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-spin" />
               <span>Hyderabad's Premium Party & Event Decorators</span>
-              <Sparkles className="h-3.5 w-3.5 text-brand-gold animate-spin" />
+              <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-spin" />
             </p>
           </div>
         </div>
 
-        {/* ── 3. Bottom Progress Bar & Loading Indicator ── */}
+        {/* ── 3. Bottom Gold Progress Bar & Loading Indicator ── */}
         <div className="w-48 sm:w-64 pt-4 space-y-2">
-          <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/20">
-            <div className="h-full bg-gradient-to-r from-amber-400 via-pink-400 to-amber-300 rounded-full animate-splash-progress" />
+          <div className="h-2 w-full bg-amber-950/80 rounded-full overflow-hidden p-0.5 border border-amber-400/40 shadow-inner">
+            <div className="h-full bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-400 rounded-full animate-splash-progress shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
           </div>
-          <p className="text-[10px] uppercase font-bold text-white/50 tracking-widest font-sans">
-            Preparing Celebration Magic...
+          <p className="text-[10px] uppercase font-extrabold text-amber-200/70 tracking-widest font-sans">
+            Preparing Gold Celebration Magic...
           </p>
         </div>
 

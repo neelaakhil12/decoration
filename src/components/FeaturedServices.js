@@ -114,8 +114,8 @@ export default function FeaturedServices({
           </p>
         </div>
 
-        {/* ── 1. Explore at a Glance — Category Chips ── */}
-        <div className="space-y-2">
+        {/* ── 1. Explore at a Glance — Category Chips (Hidden on mobile) ── */}
+        <div className="hidden md:block space-y-2">
           <div className="flex items-center gap-2 pl-1">
             <Sparkles className="h-4 w-4 text-brand-gold fill-brand-gold" />
             <h3 className="text-xs md:text-base uppercase tracking-wider font-extrabold text-brand-plum/60 font-sans">

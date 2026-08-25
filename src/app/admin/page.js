@@ -379,24 +379,26 @@ export default function AdminDashboardPage() {
           
           {/* Brand Logo & Header */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <img
-                src="/logo.png"
-                alt="Decor Dazzlers Logo"
-                className="h-12 w-auto object-contain bg-brand-plum/5 p-1.5 rounded-xl border border-gray-200 shadow-xs"
-              />
+            <div className="flex items-center space-x-3.5">
+              <div className="h-14 w-14 rounded-2xl bg-white p-1 border border-gray-200 shadow-md flex items-center justify-center shrink-0 overflow-hidden">
+                <img
+                  src="/logo.png"
+                  alt="Decor Dazzlers Logo"
+                  className="h-full w-full object-contain filter contrast-105 saturate-110 drop-shadow-xs"
+                />
+              </div>
               <div>
-                <h2 className="font-serif font-black text-base text-brand-plum leading-tight">
+                <h2 className="font-serif font-black text-lg text-brand-plum leading-tight tracking-tight">
                   Decor Dazzlers
                 </h2>
-                <span className="inline-flex items-center text-[10px] text-brand-gold font-bold uppercase tracking-wider">
-                  <ShieldCheck className="h-3 w-3 mr-1" /> Admin Studio
+                <span className="inline-flex items-center text-[10px] text-brand-gold font-black uppercase tracking-wider">
+                  <ShieldCheck className="h-3.5 w-3.5 mr-1 text-brand-gold" /> Admin Studio
                 </span>
               </div>
             </div>
             <button
               onClick={() => setMobileSidebarOpen(false)}
-              className="md:hidden text-gray-400 hover:text-gray-700"
+              className="md:hidden text-gray-400 hover:text-gray-700 p-1"
             >
               <X className="h-6 w-6" />
             </button>

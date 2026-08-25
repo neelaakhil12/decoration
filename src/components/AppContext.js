@@ -153,14 +153,13 @@ export function AppProvider({ children }) {
 
   const [heroVideoUrl, setHeroVideoUrl] = useState("/hero_video.mp4");
 
-  const updateHeroVideoUrl = (url) => {
-    setHeroVideoUrl(url);
+  const saveToLocal = (key, data) => {
     try {
-      localStorage.setItem("decor_hero_video_url", url);
+      localStorage.setItem(key, typeof data === "string" ? data : JSON.stringify(data));
     } catch (e) {}
   };
 
-  // Load stored data on mount if available in localStorage
+  // 1. Initial Local Storage Cache load (for fast initial render before Supabase resolves)
   useEffect(() => {
     try {
       const savedVideoUrl = localStorage.getItem("decor_hero_video_url");
@@ -199,11 +198,132 @@ export function AppProvider({ children }) {
         if (parsed && parsed.length > 0) setBookings(parsed);
       }
     } catch (e) {
-      console.error("Error reading localStorage on mount:", e);
+      console.error("Error reading initial cache:", e);
     }
   }, []);
 
-  // Sync across tabs via window storage event
+  // 2. Fetch All Services, Gallery, Category Posters, Bookings & System Configs from Supabase
+  const loadSupabaseData = useCallback(async () => {
+    try {
+      // 1. Services
+      const { data: dbServices, error: servError } = await supabase
+        .from("services")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!servError && dbServices) {
+        setServices(dbServices);
+        saveToLocal("decor_services", dbServices);
+      }
+
+      // 2. Gallery Items
+      const { data: dbGallery, error: galError } = await supabase
+        .from("gallery")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!galError && dbGallery) {
+        setGalleryItems(dbGallery);
+        saveToLocal("decor_gallery_items", dbGallery);
+      }
+
+      // 3. Category Posters & System Configs
+      const { data: dbCategories, error: catError } = await supabase
+        .from("category_posters")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+      if (!catError && dbCategories && dbCategories.length > 0) {
+        // Separate regular category cards from system configs
+        const regularPosters = dbCategories.filter((c) => c.key !== "SYS_CONFIG");
+        if (regularPosters.length > 0) {
+          setCategoryPosters(regularPosters);
+          saveToLocal("decor_category_posters", regularPosters);
+        }
+
+        // Hero Video Config
+        const heroVideoCfg = dbCategories.find((c) => c.id === "CONFIG_HERO_VIDEO");
+        if (heroVideoCfg?.image) {
+          setHeroVideoUrl(heroVideoCfg.image);
+          saveToLocal("decor_hero_video_url", heroVideoCfg.image);
+        }
+
+        // Subcategories Config
+        const subCatsCfg = dbCategories.find((c) => c.id === "CONFIG_SUBCATEGORIES");
+        if (subCatsCfg?.name) {
+          try {
+            const parsed = JSON.parse(subCatsCfg.name);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setSubCategories(Array.from(new Set([...defaultSubCategories, ...parsed])));
+              saveToLocal("decor_subcategories", parsed);
+            }
+          } catch (e) {}
+        }
+
+        // Hero Sliders Config
+        const slidersCfg = dbCategories.find((c) => c.id === "CONFIG_HERO_SLIDERS");
+        if (slidersCfg?.name) {
+          try {
+            const parsed = JSON.parse(slidersCfg.name);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setHeroSliders(parsed);
+              saveToLocal("decor_hero_sliders", parsed);
+            }
+          } catch (e) {}
+        }
+      }
+
+      // 4. Bookings
+      const { data: dbBookings, error: bkError } = await supabase
+        .from("bookings")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!bkError && dbBookings) {
+        setBookings(dbBookings);
+        saveToLocal("decor_booking_inquiries", dbBookings);
+      }
+    } catch (err) {
+      console.warn("Supabase synchronization notice:", err);
+    }
+  }, []);
+
+  // 3. Load Supabase data on mount & user location
+  useEffect(() => {
+    const saved = localStorage.getItem("decor_user_location");
+    if (saved) {
+      try {
+        setLocation(JSON.parse(saved));
+      } catch (e) {}
+    } else {
+      const timer = setTimeout(() => {
+        setIsLocationOpen(true);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+
+    loadSupabaseData();
+  }, [loadSupabaseData]);
+
+  // 4. Supabase Real-time Database Synchronization across Vercel & Localhost
+  useEffect(() => {
+    const channel = supabase
+      .channel("supabase-realtime-sync")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public" },
+        () => {
+          loadSupabaseData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadSupabaseData]);
+
+  // 5. Cross-tab storage synchronization
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === "decor_hero_sliders" && e.newValue) {
@@ -221,98 +341,17 @@ export function AppProvider({ children }) {
       if (e.key === "decor_booking_inquiries" && e.newValue) {
         try { setBookings(JSON.parse(e.newValue)); } catch (err) {}
       }
+      if (e.key === "decor_hero_video_url" && e.newValue) {
+        setHeroVideoUrl(e.newValue);
+      }
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  const saveToLocal = (key, data) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(data));
-    } catch (e) {}
-  };
-
-  // Fetch Services, Gallery & Sliders from Supabase with Fallback
-  const loadSupabaseData = useCallback(async () => {
-    try {
-      // 1. Fetch Services
-      const { data: dbServices, error: servError } = await supabase
-        .from("services")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!servError && dbServices && dbServices.length > 0) {
-        setServices(dbServices);
-        saveToLocal("decor_services", dbServices);
-      }
-
-      // 2. Fetch Gallery Items
-      const { data: dbGallery, error: galError } = await supabase
-        .from("gallery")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!galError && dbGallery && dbGallery.length > 0) {
-        setGalleryItems(dbGallery);
-        saveToLocal("decor_gallery_items", dbGallery);
-      }
-
-      // 3. Fetch Hero Sliders
-      const { data: dbSliders, error: sldError } = await supabase
-        .from("sliders")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!sldError && dbSliders && dbSliders.length > 0) {
-        setHeroSliders(dbSliders);
-        saveToLocal("decor_hero_sliders", dbSliders);
-      }
-
-      // 4. Fetch Category Posters
-      const { data: dbCategories, error: catError } = await supabase
-        .from("category_posters")
-        .select("*")
-        .order("created_at", { ascending: true });
-
-      if (!catError && dbCategories && dbCategories.length > 0) {
-        setCategoryPosters(dbCategories);
-        saveToLocal("decor_category_posters", dbCategories);
-      }
-
-      // 5. Fetch Bookings
-      const { data: dbBookings, error: bkError } = await supabase
-        .from("bookings")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!bkError && dbBookings && dbBookings.length > 0) {
-        setBookings(dbBookings);
-        saveToLocal("decor_booking_inquiries", dbBookings);
-      }
-    } catch (err) {
-      console.warn("Supabase load fallback triggered:", err);
-    }
-  }, []);
-
-  useEffect(() => {
-    // Check local saved location
-    const saved = localStorage.getItem("decor_user_location");
-    if (saved) {
-      try {
-        setLocation(JSON.parse(saved));
-      } catch (e) {}
-    } else {
-      const timer = setTimeout(() => {
-        setIsLocationOpen(true);
-      }, 700);
-      return () => clearTimeout(timer);
-    }
-
-    loadSupabaseData();
-  }, [loadSupabaseData]);
-
+  // --- Sanitizers & Helpers ---
   const sanitizeDbService = (s) => ({
-    id: s.id,
+    id: String(s.id),
     title: s.title || "Decoration Package",
     category: s.category || "Birthday",
     subCategory: s.subCategory || s.decorShape || "Wall Decor",
@@ -323,6 +362,85 @@ export function AppProvider({ children }) {
     image: s.image || (s.images && s.images[0]) || "/images/birthday_decor.png",
     created_at: s.created_at || new Date().toISOString(),
   });
+
+  const sanitizeDbGallery = (g) => ({
+    id: typeof g.id === "number" ? g.id : Date.now(),
+    title: g.title || "Decoration Project",
+    category: g.category || "Birthdays",
+    type: g.type || "image",
+    image: g.image || "/images/birthday_decor.png",
+    videoUrl: g.videoUrl || null,
+    created_at: g.created_at || new Date().toISOString(),
+  });
+
+  const sanitizeDbCategoryPoster = (c) => ({
+    id: String(c.id || "CAT" + Math.floor(100 + Math.random() * 900)),
+    name: c.name || "Celebration Theme",
+    key: c.key || "Birthdays",
+    image: c.image || "/images/birthday_decor.png",
+    span: c.span || "col-span-1",
+    aspect: c.aspect || "1/1",
+    created_at: c.created_at || new Date().toISOString(),
+  });
+
+  // --- CRUD Operations Directly Backed by Supabase ---
+
+  // HERO VIDEO CRUD
+  const updateHeroVideoUrl = async (url) => {
+    setHeroVideoUrl(url);
+    saveToLocal("decor_hero_video_url", url);
+    try {
+      await supabase.from("category_posters").upsert({
+        id: "CONFIG_HERO_VIDEO",
+        name: "Hero Video Config",
+        key: "SYS_CONFIG",
+        image: url,
+        span: "col-span-1",
+        aspect: "1/1",
+      }, { onConflict: "id" });
+    } catch (e) {
+      console.error("Supabase hero video update error:", e);
+    }
+  };
+
+  // SUBCATEGORIES CRUD
+  const addSubCategory = async (newSubCat) => {
+    if (!newSubCat || !newSubCat.trim()) return;
+    const trimmed = newSubCat.trim();
+    const updated = Array.from(new Set([...subCategories, trimmed]));
+    setSubCategories(updated);
+    saveToLocal("decor_subcategories", updated);
+    try {
+      await supabase.from("category_posters").upsert({
+        id: "CONFIG_SUBCATEGORIES",
+        name: JSON.stringify(updated),
+        key: "SYS_CONFIG",
+        image: "",
+        span: "col-span-1",
+        aspect: "1/1",
+      }, { onConflict: "id" });
+    } catch (e) {
+      console.error("Supabase subcategories update error:", e);
+    }
+  };
+
+  const deleteSubCategory = async (subCatToDelete) => {
+    const updated = subCategories.filter((item) => item !== subCatToDelete);
+    setSubCategories(updated);
+    saveToLocal("decor_subcategories", updated);
+    try {
+      await supabase.from("category_posters").upsert({
+        id: "CONFIG_SUBCATEGORIES",
+        name: JSON.stringify(updated),
+        key: "SYS_CONFIG",
+        image: "",
+        span: "col-span-1",
+        aspect: "1/1",
+      }, { onConflict: "id" });
+    } catch (e) {
+      console.error("Supabase subcategories delete error:", e);
+    }
+  };
 
   // SERVICES CRUD
   const addService = async (newService) => {
@@ -390,11 +508,10 @@ export function AppProvider({ children }) {
 
   // GALLERY CRUD
   const addGalleryItem = async (newItem) => {
-    const galleryObj = {
+    const galleryObj = sanitizeDbGallery({
       id: Date.now(),
       ...newItem,
-      created_at: new Date().toISOString(),
-    };
+    });
 
     setGalleryItems((prev) => {
       const updated = [galleryObj, ...prev];
@@ -403,7 +520,8 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("gallery").insert([galleryObj]);
+      const { error } = await supabase.from("gallery").insert([galleryObj]);
+      if (error) console.error("Supabase gallery insert error:", error.message);
     } catch (e) {
       console.error("Supabase gallery insert error:", e);
     }
@@ -417,7 +535,15 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("gallery").update(updatedItem).eq("id", id);
+      const payload = {
+        title: updatedItem.title,
+        category: updatedItem.category,
+        type: updatedItem.type,
+        image: updatedItem.image,
+        videoUrl: updatedItem.videoUrl || null,
+      };
+      const { error } = await supabase.from("gallery").update(payload).eq("id", id);
+      if (error) console.error("Supabase gallery update error:", error.message);
     } catch (e) {
       console.error("Supabase gallery update error:", e);
     }
@@ -431,7 +557,8 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("gallery").delete().eq("id", id);
+      const { error } = await supabase.from("gallery").delete().eq("id", id);
+      if (error) console.error("Supabase gallery delete error:", error.message);
     } catch (e) {
       console.error("Supabase gallery delete error:", e);
     }
@@ -445,42 +572,57 @@ export function AppProvider({ children }) {
       created_at: new Date().toISOString(),
     };
 
-    setHeroSliders((prev) => {
-      const updated = [sliderObj, ...prev];
-      saveToLocal("decor_hero_sliders", updated);
-      return updated;
-    });
+    const updated = [sliderObj, ...heroSliders];
+    setHeroSliders(updated);
+    saveToLocal("decor_hero_sliders", updated);
 
     try {
-      await supabase.from("sliders").insert([sliderObj]);
+      await supabase.from("category_posters").upsert({
+        id: "CONFIG_HERO_SLIDERS",
+        name: JSON.stringify(updated),
+        key: "SYS_CONFIG",
+        image: "",
+        span: "col-span-1",
+        aspect: "1/1",
+      }, { onConflict: "id" });
     } catch (e) {
-      console.error("Supabase slider insert error:", e);
+      console.error("Supabase slider upsert error:", e);
     }
   };
 
   const updateHeroSlider = async (id, updatedSlider) => {
-    setHeroSliders((prev) => {
-      const updated = prev.map((item) => (item.id === id ? { ...item, ...updatedSlider } : item));
-      saveToLocal("decor_hero_sliders", updated);
-      return updated;
-    });
+    const updated = heroSliders.map((item) => (item.id === id ? { ...item, ...updatedSlider } : item));
+    setHeroSliders(updated);
+    saveToLocal("decor_hero_sliders", updated);
 
     try {
-      await supabase.from("sliders").update(updatedSlider).eq("id", id);
+      await supabase.from("category_posters").upsert({
+        id: "CONFIG_HERO_SLIDERS",
+        name: JSON.stringify(updated),
+        key: "SYS_CONFIG",
+        image: "",
+        span: "col-span-1",
+        aspect: "1/1",
+      }, { onConflict: "id" });
     } catch (e) {
       console.error("Supabase slider update error:", e);
     }
   };
 
   const deleteHeroSlider = async (id) => {
-    setHeroSliders((prev) => {
-      const updated = prev.filter((item) => item.id !== id);
-      saveToLocal("decor_hero_sliders", updated);
-      return updated;
-    });
+    const updated = heroSliders.filter((item) => item.id !== id);
+    setHeroSliders(updated);
+    saveToLocal("decor_hero_sliders", updated);
 
     try {
-      await supabase.from("sliders").delete().eq("id", id);
+      await supabase.from("category_posters").upsert({
+        id: "CONFIG_HERO_SLIDERS",
+        name: JSON.stringify(updated),
+        key: "SYS_CONFIG",
+        image: "",
+        span: "col-span-1",
+        aspect: "1/1",
+      }, { onConflict: "id" });
     } catch (e) {
       console.error("Supabase slider delete error:", e);
     }
@@ -488,13 +630,7 @@ export function AppProvider({ children }) {
 
   // CATEGORY POSTERS CRUD
   const addCategoryPoster = async (newPoster) => {
-    const posterObj = {
-      id: "CAT" + Math.floor(100 + Math.random() * 900),
-      span: "col-span-1",
-      aspect: "1/1",
-      ...newPoster,
-      created_at: new Date().toISOString(),
-    };
+    const posterObj = sanitizeDbCategoryPoster(newPoster);
 
     setCategoryPosters((prev) => {
       const updated = [...prev, posterObj];
@@ -503,7 +639,8 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("category_posters").insert([posterObj]);
+      const { error } = await supabase.from("category_posters").insert([posterObj]);
+      if (error) console.error("Supabase category poster insert error:", error.message);
     } catch (e) {
       console.error("Supabase category poster insert error:", e);
     }
@@ -517,7 +654,15 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("category_posters").update(updatedPoster).eq("id", id);
+      const payload = {
+        name: updatedPoster.name,
+        key: updatedPoster.key,
+        image: updatedPoster.image,
+        span: updatedPoster.span || "col-span-1",
+        aspect: updatedPoster.aspect || "1/1",
+      };
+      const { error } = await supabase.from("category_posters").update(payload).eq("id", id);
+      if (error) console.error("Supabase category poster update error:", error.message);
     } catch (e) {
       console.error("Supabase category poster update error:", e);
     }
@@ -531,7 +676,8 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("category_posters").delete().eq("id", id);
+      const { error } = await supabase.from("category_posters").delete().eq("id", id);
+      if (error) console.error("Supabase category poster delete error:", error.message);
     } catch (e) {
       console.error("Supabase category poster delete error:", e);
     }
@@ -553,19 +699,20 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("bookings").insert([{
+      const { error } = await supabase.from("bookings").insert([{
         id: bookingObj.id,
         name: bookingObj.name,
         phone: bookingObj.phone,
         email: bookingObj.email || "",
         requirement: bookingObj.requirement || "",
-        selected_theme: bookingObj.selectedTheme || "",
+        selected_theme: bookingObj.selectedTheme || bookingObj.selected_theme || "",
         address: bookingObj.address || "",
-        location_link: bookingObj.locationLink || "",
-        custom_notes: bookingObj.customNotes || "",
+        location_link: bookingObj.locationLink || bookingObj.location_link || "",
+        custom_notes: bookingObj.customNotes || bookingObj.custom_notes || "",
         status: bookingObj.status,
         created_at: bookingObj.created_at,
       }]);
+      if (error) console.error("Supabase booking insert error:", error.message);
     } catch (e) {
       console.error("Supabase booking insert error:", e);
     }
@@ -579,7 +726,8 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("bookings").update({ status }).eq("id", id);
+      const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
+      if (error) console.error("Supabase booking status update error:", error.message);
     } catch (e) {
       console.error("Supabase booking status update error:", e);
     }
@@ -593,30 +741,11 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("bookings").delete().eq("id", id);
+      const { error } = await supabase.from("bookings").delete().eq("id", id);
+      if (error) console.error("Supabase booking delete error:", error.message);
     } catch (e) {
       console.error("Supabase booking delete error:", e);
     }
-  };
-
-  // Subcategories CRUD
-  const addSubCategory = (newSubCat) => {
-    if (!newSubCat || !newSubCat.trim()) return;
-    const trimmed = newSubCat.trim();
-    setSubCategories((prev) => {
-      if (prev.includes(trimmed)) return prev;
-      const updated = [...prev, trimmed];
-      saveToLocal("decor_subcategories", updated);
-      return updated;
-    });
-  };
-
-  const deleteSubCategory = (subCatToDelete) => {
-    setSubCategories((prev) => {
-      const updated = prev.filter((item) => item !== subCatToDelete);
-      saveToLocal("decor_subcategories", updated);
-      return updated;
-    });
   };
 
   // Location Handlers

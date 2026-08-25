@@ -126,6 +126,55 @@ export default function AdminDashboardPage() {
     router.push("/adminlogin");
   };
 
+  // Direct Cloudinary Upload (bypasses Vercel 4.5MB serverless payload limit for large videos)
+  const uploadDirectToCloudinary = async (file, type = "image") => {
+    const resourceType = type === "video" ? "video" : "image";
+
+    // 1. Direct signed stream to Cloudinary CDN
+    try {
+      const sigRes = await fetch("/api/upload?folder=decorations");
+      if (sigRes.ok) {
+        const { signature, timestamp, apiKey, cloudName, folder } = await sigRes.json();
+        if (signature && apiKey && cloudName) {
+          const directForm = new FormData();
+          directForm.append("file", file);
+          directForm.append("api_key", apiKey);
+          directForm.append("timestamp", timestamp);
+          directForm.append("signature", signature);
+          directForm.append("folder", folder);
+
+          const cdnRes = await fetch(
+            `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+            {
+              method: "POST",
+              body: directForm,
+            }
+          );
+          const cdnData = await cdnRes.json();
+          if (cdnData.secure_url) {
+            return cdnData.secure_url;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Direct upload fallback triggered:", e);
+    }
+
+    // 2. Server API Fallback
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("resource_type", resourceType);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (data.url) return data.url;
+    throw new Error(data.error || "Upload failed");
+  };
+
   // Handle Cloudinary File Upload
   const handleFileUpload = async (e, type = "image", callback) => {
     const file = e.target.files?.[0];
@@ -133,24 +182,13 @@ export default function AdminDashboardPage() {
 
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("resource_type", type === "video" ? "video" : "image");
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (data.url) {
-        callback(data.url);
-      } else {
-        alert("Upload failed: " + (data.error || "Unknown error"));
+      const url = await uploadDirectToCloudinary(file, type);
+      if (url) {
+        callback(url);
       }
     } catch (err) {
       console.error(err);
-      alert("Error uploading file");
+      alert("Error uploading file: " + (err.message || "Unknown error"));
     } finally {
       setIsUploading(false);
     }
@@ -165,18 +203,9 @@ export default function AdminDashboardPage() {
     try {
       const uploadedUrls = [];
       for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("resource_type", "image");
-
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await res.json();
-        if (data.url) {
-          uploadedUrls.push(data.url);
+        const url = await uploadDirectToCloudinary(file, "image");
+        if (url) {
+          uploadedUrls.push(url);
         }
       }
 
@@ -185,7 +214,7 @@ export default function AdminDashboardPage() {
       }
     } catch (err) {
       console.error(err);
-      alert("Error uploading images");
+      alert("Error uploading images: " + (err.message || "Unknown error"));
     } finally {
       setIsUploading(false);
     }

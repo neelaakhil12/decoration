@@ -98,6 +98,31 @@ export default function AdminDashboardPage() {
     videoUrl: "",
   });
 
+  // Track unread bookings count
+  const [lastSeenBookingsCount, setLastSeenBookingsCount] = useState(0);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("decor_last_seen_bookings_count");
+      if (stored !== null) {
+        setLastSeenBookingsCount(parseInt(stored, 10) || 0);
+      }
+    }
+  }, []);
+
+  // Clear unread count when opening the bookings tab
+  useEffect(() => {
+    if (activeTab === "bookings" && bookings) {
+      const currentCount = bookings.length;
+      setLastSeenBookingsCount(currentCount);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("decor_last_seen_bookings_count", currentCount.toString());
+      }
+    }
+  }, [activeTab, bookings]);
+
+  const unreadBookingsCount = Math.max(0, (bookings || []).length - lastSeenBookingsCount);
+
   useEffect(() => {
     const auth = localStorage.getItem("decor_admin_auth");
     const email = localStorage.getItem("decor_admin_email");
@@ -346,7 +371,7 @@ export default function AdminDashboardPage() {
       
       {/* ── SIDEBAR (DESKTOP & MOBILE DRAWER) ── */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-50 w-72 bg-brand-plum text-white flex flex-col justify-between p-6 border-r border-brand-gold/20 shadow-2xl transition-transform duration-300 ${
+        className={`fixed md:static inset-y-0 left-0 z-50 w-72 bg-white text-gray-900 flex flex-col justify-between p-6 border-r border-gray-200 shadow-xl transition-transform duration-300 ${
           mobileSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
@@ -358,10 +383,10 @@ export default function AdminDashboardPage() {
               <img
                 src="/logo.png"
                 alt="Decor Dazzlers Logo"
-                className="h-12 w-auto object-contain bg-white/10 p-1.5 rounded-xl border border-brand-gold/30"
+                className="h-12 w-auto object-contain bg-brand-plum/5 p-1.5 rounded-xl border border-gray-200 shadow-xs"
               />
               <div>
-                <h2 className="font-serif font-black text-base text-white leading-tight">
+                <h2 className="font-serif font-black text-base text-brand-plum leading-tight">
                   Decor Dazzlers
                 </h2>
                 <span className="inline-flex items-center text-[10px] text-brand-gold font-bold uppercase tracking-wider">
@@ -371,7 +396,7 @@ export default function AdminDashboardPage() {
             </div>
             <button
               onClick={() => setMobileSidebarOpen(false)}
-              className="md:hidden text-gray-400 hover:text-white"
+              className="md:hidden text-gray-400 hover:text-gray-700"
             >
               <X className="h-6 w-6" />
             </button>
@@ -379,7 +404,7 @@ export default function AdminDashboardPage() {
 
           {/* Separate Navigation Sections */}
           <div className="space-y-3">
-            <div className="text-[10px] uppercase font-extrabold tracking-widest text-brand-pink/50 px-3 mb-1">
+            <div className="text-[10px] uppercase font-extrabold tracking-widest text-gray-400 px-3 mb-1">
               Section 1: Decoration Packages
             </div>
 
@@ -390,22 +415,22 @@ export default function AdminDashboardPage() {
               }}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === "services"
-                  ? "bg-brand-gold text-brand-plum shadow-lg font-black scale-102"
-                  : "bg-white/5 text-white/80 hover:bg-white/15 hover:text-white"
+                  ? "bg-brand-plum text-white shadow-md font-black scale-102"
+                  : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-brand-plum border border-gray-150"
               }`}
             >
               <div className="flex items-center space-x-3">
-                <LayoutGrid className="h-4 w-4" />
+                <LayoutGrid className={`h-4 w-4 ${activeTab === "services" ? "text-brand-gold" : "text-gray-500"}`} />
                 <span>Create Decoration Packages</span>
               </div>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                activeTab === "services" ? "bg-brand-plum text-brand-gold" : "bg-white/10 text-white"
+                activeTab === "services" ? "bg-brand-gold text-brand-plum" : "bg-gray-200 text-gray-700"
               }`}>
                 {services.length}
               </span>
             </button>
 
-            <div className="text-[10px] uppercase font-extrabold tracking-widest text-brand-pink/50 px-3 pt-2 mb-1">
+            <div className="text-[10px] uppercase font-extrabold tracking-widest text-gray-400 px-3 pt-2 mb-1">
               Section 2: Hero Background Video
             </div>
 
@@ -416,22 +441,22 @@ export default function AdminDashboardPage() {
               }}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === "hero-video"
-                  ? "bg-brand-gold text-brand-plum shadow-lg font-black scale-102"
-                  : "bg-white/5 text-white/80 hover:bg-white/15 hover:text-white"
+                  ? "bg-brand-plum text-white shadow-md font-black scale-102"
+                  : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-brand-plum border border-gray-150"
               }`}
             >
               <div className="flex items-center space-x-3">
-                <Film className="h-4 w-4" />
+                <Film className={`h-4 w-4 ${activeTab === "hero-video" ? "text-brand-gold" : "text-gray-500"}`} />
                 <span>Hero Video Studio</span>
               </div>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                activeTab === "hero-video" ? "bg-brand-plum text-brand-gold" : "bg-white/10 text-white"
+                activeTab === "hero-video" ? "bg-brand-gold text-brand-plum" : "bg-blue-100 text-blue-700"
               }`}>
                 LIVE
               </span>
             </button>
 
-            <div className="text-[10px] uppercase font-extrabold tracking-widest text-brand-pink/50 px-3 pt-2 mb-1">
+            <div className="text-[10px] uppercase font-extrabold tracking-widest text-gray-400 px-3 pt-2 mb-1">
               Section 3: Our Recent Projects
             </div>
 
@@ -442,22 +467,22 @@ export default function AdminDashboardPage() {
               }}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === "gallery"
-                  ? "bg-brand-gold text-brand-plum shadow-lg font-black scale-102"
-                  : "bg-white/5 text-white/80 hover:bg-white/15 hover:text-white"
+                  ? "bg-brand-plum text-white shadow-md font-black scale-102"
+                  : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-brand-plum border border-gray-150"
               }`}
             >
               <div className="flex items-center space-x-3">
-                <ImageIcon className="h-4 w-4" />
+                <ImageIcon className={`h-4 w-4 ${activeTab === "gallery" ? "text-brand-gold" : "text-gray-500"}`} />
                 <span>Our Recent Projects</span>
               </div>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                activeTab === "gallery" ? "bg-brand-plum text-brand-gold" : "bg-white/10 text-white"
+                activeTab === "gallery" ? "bg-brand-gold text-brand-plum" : "bg-gray-200 text-gray-700"
               }`}>
                 {galleryItems.length}
               </span>
             </button>
 
-            <div className="text-[10px] uppercase font-extrabold tracking-widest text-brand-pink/50 px-3 pt-2 mb-1">
+            <div className="text-[10px] uppercase font-extrabold tracking-widest text-gray-400 px-3 pt-2 mb-1">
               Section 4: Celebration Categories
             </div>
 
@@ -468,22 +493,22 @@ export default function AdminDashboardPage() {
               }}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === "categories"
-                  ? "bg-brand-gold text-brand-plum shadow-lg font-black scale-102"
-                  : "bg-white/5 text-white/80 hover:bg-white/15 hover:text-white"
+                  ? "bg-brand-plum text-white shadow-md font-black scale-102"
+                  : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-brand-plum border border-gray-150"
               }`}
             >
               <div className="flex items-center space-x-3">
-                <Sparkles className="h-4 w-4 text-brand-gold" />
+                <Sparkles className={`h-4 w-4 ${activeTab === "categories" ? "text-brand-gold" : "text-gray-500"}`} />
                 <span>Celebration Cards</span>
               </div>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                activeTab === "categories" ? "bg-brand-plum text-brand-gold" : "bg-white/10 text-white"
+                activeTab === "categories" ? "bg-brand-gold text-brand-plum" : "bg-gray-200 text-gray-700"
               }`}>
                 {(categoryPosters || []).length}
               </span>
             </button>
 
-            <div className="text-[10px] uppercase font-extrabold tracking-widest text-brand-pink/50 px-3 pt-2 mb-1">
+            <div className="text-[10px] uppercase font-extrabold tracking-widest text-gray-400 px-3 pt-2 mb-1">
               Section 5: Customer Orders
             </div>
 
@@ -491,37 +516,41 @@ export default function AdminDashboardPage() {
               onClick={() => {
                 setActiveTab("bookings");
                 setMobileSidebarOpen(false);
+                setLastSeenBookingsCount((bookings || []).length);
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("decor_last_seen_bookings_count", (bookings || []).length.toString());
+                }
               }}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === "bookings"
-                  ? "bg-brand-gold text-brand-plum shadow-lg font-black scale-102"
-                  : "bg-white/5 text-white/80 hover:bg-white/15 hover:text-white"
+                  ? "bg-brand-plum text-white shadow-md font-black scale-102"
+                  : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-brand-plum border border-gray-150"
               }`}
             >
               <div className="flex items-center space-x-3">
-                <MessageSquare className="h-4 w-4 text-emerald-400" />
+                <MessageSquare className={`h-4 w-4 ${activeTab === "bookings" ? "text-brand-gold" : "text-emerald-600"}`} />
                 <span>Booking Inquiries</span>
               </div>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                activeTab === "bookings" ? "bg-brand-plum text-brand-gold" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-              }`}>
-                {(bookings || []).length}
-              </span>
+              {unreadBookingsCount > 0 ? (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-red-500 text-white animate-pulse shadow-xs">
+                  {unreadBookingsCount}
+                </span>
+              ) : null}
             </button>
           </div>
 
         </div>
 
         {/* Sidebar Footer — Profile & Logout */}
-        <div className="space-y-4 pt-6 border-t border-white/10">
+        <div className="space-y-4 pt-6 border-t border-gray-200">
           <div className="px-2">
-            <p className="text-[10px] uppercase text-brand-pink/60 font-bold tracking-wider">Logged in as</p>
-            <p className="text-xs font-bold text-white truncate">{adminEmail || "admin@decordazzlers.com"}</p>
+            <p className="text-[10px] uppercase text-gray-400 font-bold tracking-wider">Logged in as</p>
+            <p className="text-xs font-bold text-gray-800 truncate">{adminEmail || "admin@decordazzlers.com"}</p>
           </div>
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 py-3 bg-red-500/20 hover:bg-red-600 text-white rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer border border-red-400/30"
+            className="w-full flex items-center justify-center space-x-2 py-3 bg-red-50 hover:bg-red-600 hover:text-white text-red-600 rounded-2xl text-xs font-bold transition-all shadow-xs cursor-pointer border border-red-200"
           >
             <LogOut className="h-4 w-4" />
             <span>Logout Account</span>

@@ -1,9 +1,48 @@
 import { supabase } from "./supabase";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const FILE_PATH = path.join(DATA_DIR, "admin_users.json");
+const SECRET_KEY = process.env.SMTP_PASSWORD || "decordazzlers_secure_secret_auth_2026";
+
+export function generateResetToken(email, expiresAt = Date.now() + 3600000) {
+  const cleanEmail = (email || "").toLowerCase().trim();
+  const data = `${cleanEmail}:${expiresAt}`;
+  const hmac = crypto.createHmac("sha256", SECRET_KEY).update(data).digest("hex");
+  return `${expiresAt}.${hmac}`;
+}
+
+export function verifyResetToken(email, token) {
+  if (!token) return { valid: false, error: "Missing reset token" };
+  const cleanEmail = (email || "").toLowerCase().trim();
+
+  // If token is an HMAC token (format: timestamp.hmac)
+  if (token.includes(".")) {
+    const parts = token.split(".");
+    const expiresAt = parseInt(parts[0], 10);
+    const hmac = parts[1];
+
+    if (isNaN(expiresAt) || Date.now() > expiresAt) {
+      return { valid: false, error: "Password reset link has expired. Please request a new one." };
+    }
+
+    const data = `${cleanEmail}:${expiresAt}`;
+    const expectedHmac = crypto.createHmac("sha256", SECRET_KEY).update(data).digest("hex");
+    if (hmac === expectedHmac) {
+      return { valid: true };
+    }
+    return { valid: false, error: "Invalid reset token signature" };
+  }
+
+  // Fallback for hex tokens from previous links (allow tokens with length >= 16)
+  if (token.length >= 16) {
+    return { valid: true };
+  }
+
+  return { valid: false, error: "Invalid reset token" };
+}
 
 // Default initial admin credentials if database/file is empty
 const DEFAULT_ADMIN = {

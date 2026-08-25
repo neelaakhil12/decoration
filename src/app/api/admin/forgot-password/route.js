@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
-import { getAdminUser, saveResetToken } from "@/lib/adminAuthStore";
+import { getAdminUser, saveResetToken, generateResetToken } from "@/lib/adminAuthStore";
 
 export async function POST(req) {
   try {
     const { email } = await req.json();
     const targetEmail = (email || process.env.ADMIN_EMAIL || "prmohan.hyd@gmail.com").toLowerCase().trim();
 
-    // Generate secure reset token valid for 1 hour
-    const token = crypto.randomBytes(32).toString("hex");
+    // Generate secure HMAC reset token valid for 1 hour
     const expiresAt = Date.now() + 3600000; // 1 hour
+    const token = generateResetToken(targetEmail, expiresAt);
 
     // Store reset token in Database
     await saveResetToken(targetEmail, token, expiresAt);

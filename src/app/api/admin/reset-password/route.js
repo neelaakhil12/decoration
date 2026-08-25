@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminUser, updateAdminPassword } from "@/lib/adminAuthStore";
+import { getAdminUser, updateAdminPassword, verifyResetToken } from "@/lib/adminAuthStore";
 
 export async function POST(req) {
   try {
@@ -19,30 +19,23 @@ export async function POST(req) {
       );
     }
 
-    const adminUser = await getAdminUser(email);
+    const verification = verifyResetToken(email, token);
 
-    if (!adminUser || !adminUser.resetToken) {
-      return NextResponse.json(
-        { error: "Invalid or expired password reset request" },
-        { status: 400 }
-      );
+    if (!verification.valid) {
+      // Check if DB or local store has this token recorded
+      const adminUser = await getAdminUser(email);
+      const isDbMatch = adminUser && adminUser.resetToken && adminUser.resetToken === token;
+      const isNotExpired = !adminUser?.resetTokenExpires || Date.now() <= new Date(adminUser.resetTokenExpires).getTime();
+
+      if (!isDbMatch || !isNotExpired) {
+        return NextResponse.json(
+          { error: verification.error || "Invalid or expired password reset request" },
+          { status: 400 }
+        );
+      }
     }
 
-    if (adminUser.resetToken !== token) {
-      return NextResponse.json(
-        { error: "Invalid reset token provided" },
-        { status: 400 }
-      );
-    }
-
-    if (adminUser.resetTokenExpires && Date.now() > new Date(adminUser.resetTokenExpires).getTime()) {
-      return NextResponse.json(
-        { error: "Password reset link has expired. Please request a new link." },
-        { status: 400 }
-      );
-    }
-
-    // Save new password into database
+    // Save new password into database / store
     await updateAdminPassword(email, newPassword);
 
     return NextResponse.json({

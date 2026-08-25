@@ -113,306 +113,381 @@ export default function ProductDetailPage({ params }) {
   };
 
   return (
-    <div className="bg-[#F3F4F6] min-h-screen pb-44 pt-2 sm:pt-4 font-sans">
+    <div className="bg-[#F3F4F6] min-h-screen pb-44 lg:pb-20 pt-2 sm:pt-6 font-sans">
       
-      {/* ── 1. Top Full Image Container with Floating Buttons ── */}
-      <div className="relative w-full max-w-2xl mx-auto bg-black aspect-square sm:aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md">
-        <img
-          src={sliderImages[activeImageIdx] || product.image || "/images/birthday_decor.png"}
-          alt={product.title}
-          className="w-full h-full object-contain bg-black transition-all duration-500"
-        />
-
-        {/* Floating Top Left: Back Button */}
-        <button
-          onClick={() => router.back()}
-          className="absolute top-4 left-4 p-2.5 bg-white/90 backdrop-blur-md text-gray-800 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer z-10"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-
-        {/* Floating Top Right: Share & Heart Wishlist */}
-        <div className="absolute top-4 right-4 flex items-center space-x-2.5 z-10">
-          <button
-            onClick={handleShare}
-            className="p-2.5 bg-[#2563EB] text-white rounded-full shadow-lg hover:bg-blue-700 transition-all cursor-pointer"
-            title="Share Product"
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
+      {/* ── Main Container (2-Column Grid on Desktop) ── */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
           
-          <button
-            onClick={() => setIsFavorite(!isFavorite)}
-            className="p-2.5 bg-white/90 backdrop-blur-md text-gray-700 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer"
-            title="Wishlist"
-          >
-            <Heart className={`h-5 w-5 transition-colors ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
-          </button>
-        </div>
-
-        {/* Previous & Next Navigation Buttons for Multiple Slides */}
-        {sliderImages.length > 1 && (
-          <>
-            <button
-              onClick={() => setActiveImageIdx((prev) => (prev === 0 ? sliderImages.length - 1 : prev - 1))}
-              className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/80 text-white rounded-full backdrop-blur-sm transition-all cursor-pointer z-10"
-              title="Previous Photo"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => setActiveImageIdx((prev) => (prev === sliderImages.length - 1 ? 0 : prev + 1))}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/80 text-white rounded-full backdrop-blur-sm transition-all cursor-pointer z-10"
-              title="Next Photo"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </>
-        )}
-
-        {/* Share Copied Toast */}
-        {copiedLink && (
-          <div className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-black/90 text-white text-xs font-bold px-4 py-2 rounded-full shadow-xl animate-fade-in z-20">
-            Link copied to clipboard!
-          </div>
-        )}
-
-        {/* Image Slider Pagination Dots */}
-        {sliderImages.length > 1 && (
-          <div className="absolute bottom-3 left-0 right-0 flex justify-center space-x-1.5 z-10">
-            {sliderImages.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveImageIdx(i)}
-                className={`h-2 rounded-full transition-all cursor-pointer ${
-                  activeImageIdx === i ? "w-6 bg-[#2563EB]" : "w-2 bg-white/70"
-                }`}
+          {/* ══════════════════════════════════════════════════════════
+              LEFT COLUMN: Product Gallery & Guarantees (Sticky on Desktop)
+             ══════════════════════════════════════════════════════════ */}
+          <div className="lg:col-span-6 lg:sticky lg:top-24 space-y-4">
+            
+            {/* Main Image Viewer */}
+            <div className="relative w-full bg-black aspect-square sm:aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border border-gray-200/20">
+              <img
+                src={sliderImages[activeImageIdx] || product.image || "/images/birthday_decor.png"}
+                alt={product.title}
+                className="w-full h-full object-contain bg-black transition-all duration-500"
               />
-            ))}
-          </div>
-        )}
-      </div>
 
-      <div className="max-w-2xl mx-auto px-3 sm:px-4 pt-3 space-y-3">
+              {/* Floating Top Left: Back Button */}
+              <button
+                onClick={() => router.back()}
+                className="absolute top-4 left-4 p-2.5 bg-white/90 backdrop-blur-md text-gray-800 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer z-10"
+                title="Back to Catalog"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
 
-        {/* ── 2. Three Feature Cards Strip (Service process | Decor Shape | Includes) ── */}
-        <div className="grid grid-cols-3 gap-2">
-          
-          {/* Card 1: Service Process */}
-          <div 
-            onClick={() => setActiveTabModal('process')}
-            className="bg-[#E0F2FE]/80 border border-[#BAE6FD] rounded-2xl p-2.5 flex flex-col justify-between shadow-xs cursor-pointer hover:bg-[#E0F2FE] transition-all"
-          >
-            <span className="text-[10px] font-bold text-gray-700 block mb-1">Service process</span>
-            <div className="flex items-center justify-between">
-              <div className="flex -space-x-1.5 overflow-hidden">
-                <img src="/images/birthday_decor.png" className="inline-block h-6 w-6 rounded-full ring-1 ring-white object-cover" alt="step" />
-                <img src="/images/kids_birthday_decor.png" className="inline-block h-6 w-6 rounded-full ring-1 ring-white object-cover" alt="step" />
+              {/* Floating Top Right: Share & Heart Wishlist */}
+              <div className="absolute top-4 right-4 flex items-center space-x-2.5 z-10">
+                <button
+                  onClick={handleShare}
+                  className="p-2.5 bg-[#2563EB] text-white rounded-full shadow-lg hover:bg-blue-700 transition-all cursor-pointer"
+                  title="Share Product"
+                >
+                  <Share2 className="h-4 w-4" />
+                </button>
+                
+                <button
+                  onClick={() => setIsFavorite(!isFavorite)}
+                  className="p-2.5 bg-white/90 backdrop-blur-md text-gray-700 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer"
+                  title="Wishlist"
+                >
+                  <Heart className={`h-5 w-5 transition-colors ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
+                </button>
               </div>
-              <div className="p-1 bg-[#2563EB] text-white rounded-full">
-                <ChevronRight className="h-3 w-3" />
+
+              {/* Slider Arrows */}
+              {sliderImages.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setActiveImageIdx((prev) => (prev === 0 ? sliderImages.length - 1 : prev - 1))}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 bg-black/50 hover:bg-black/80 text-white rounded-full backdrop-blur-sm transition-all cursor-pointer z-10"
+                    title="Previous Photo"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => setActiveImageIdx((prev) => (prev === sliderImages.length - 1 ? 0 : prev + 1))}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-black/50 hover:bg-black/80 text-white rounded-full backdrop-blur-sm transition-all cursor-pointer z-10"
+                    title="Next Photo"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </>
+              )}
+
+              {/* Share Toast */}
+              {copiedLink && (
+                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-black/90 text-white text-xs font-bold px-4 py-2 rounded-full shadow-xl animate-fade-in z-20">
+                  Link copied to clipboard!
+                </div>
+              )}
+
+              {/* Dots */}
+              {sliderImages.length > 1 && (
+                <div className="absolute bottom-3 left-0 right-0 flex justify-center space-x-1.5 z-10">
+                  {sliderImages.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveImageIdx(i)}
+                      className={`h-2 rounded-full transition-all cursor-pointer ${
+                        activeImageIdx === i ? "w-6 bg-[#2563EB]" : "w-2 bg-white/70"
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Thumbnail Preview Strip */}
+            {sliderImages.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {sliderImages.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveImageIdx(i)}
+                    className={`relative h-16 w-16 sm:h-20 sm:w-20 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                      activeImageIdx === i ? "border-[#2563EB] ring-2 ring-blue-400/40 scale-105" : "border-gray-200 opacity-70 hover:opacity-100"
+                    }`}
+                  >
+                    <img src={img} alt="thumb" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Trust Highlights Strip */}
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-150 grid grid-cols-3 gap-2 text-center">
+              <div className="p-2 bg-blue-50/60 rounded-xl">
+                <span className="text-base block mb-1">⚡</span>
+                <span className="text-[11px] font-bold text-gray-800 block">Same Day Setup</span>
+                <span className="text-[9px] text-gray-500">In 2 Hours</span>
+              </div>
+              <div className="p-2 bg-pink-50/60 rounded-xl">
+                <span className="text-base block mb-1">🎨</span>
+                <span className="text-[11px] font-bold text-gray-800 block">Custom Colors</span>
+                <span className="text-[9px] text-gray-500">100% Bespoke</span>
+              </div>
+              <div className="p-2 bg-emerald-50/60 rounded-xl">
+                <span className="text-base block mb-1">🧹</span>
+                <span className="text-[11px] font-bold text-gray-800 block">Clean Teardown</span>
+                <span className="text-[9px] text-gray-500">Zero Damage</span>
               </div>
             </div>
+
           </div>
 
-          {/* Card 2: Decor Shape */}
-          <div 
-            onClick={() => setActiveTabModal('shape')}
-            className="bg-[#E0F2FE]/80 border border-[#BAE6FD] rounded-2xl p-2.5 flex flex-col justify-between shadow-xs cursor-pointer hover:bg-[#E0F2FE] transition-all"
-          >
-            <span className="text-[10px] font-bold text-gray-700 block mb-1">Decor Shape</span>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-1">
-                <div className="h-6 w-6 rounded-lg bg-[#2563EB]/20 border border-[#2563EB]/40 flex items-center justify-center text-[9px] font-bold text-[#2563EB]">
-                  🔲
+          {/* ══════════════════════════════════════════════════════════
+              RIGHT COLUMN: Product Info, Strip Cards, Booking & Reviews
+             ══════════════════════════════════════════════════════════ */}
+          <div className="lg:col-span-6 space-y-4">
+
+            {/* ── Feature Cards Strip (Service process | Decor Shape | Includes) ── */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              
+              {/* Card 1: Service Process */}
+              <div 
+                onClick={() => setActiveTabModal('process')}
+                className="bg-[#E0F2FE]/80 border border-[#BAE6FD] rounded-2xl p-3 flex flex-col justify-between shadow-xs cursor-pointer hover:bg-[#E0F2FE] hover:shadow-md transition-all group"
+              >
+                <span className="text-[11px] font-bold text-gray-800 block mb-1.5 font-sans">Service process</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex -space-x-1.5 overflow-hidden">
+                    <img src="/images/birthday_decor.png" className="inline-block h-6 w-6 rounded-full ring-1 ring-white object-cover" alt="step" />
+                    <img src="/images/kids_birthday_decor.png" className="inline-block h-6 w-6 rounded-full ring-1 ring-white object-cover" alt="step" />
+                  </div>
+                  <div className="p-1 bg-[#2563EB] text-white rounded-full group-hover:scale-110 transition-transform">
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </div>
                 </div>
-                <span className="text-[10px] font-bold text-gray-800 line-clamp-1">
-                  {product.decorShape || product.subCategory || "Wall Decor"}
+              </div>
+
+              {/* Card 2: Decor Shape */}
+              <div 
+                onClick={() => setActiveTabModal('shape')}
+                className="bg-[#E0F2FE]/80 border border-[#BAE6FD] rounded-2xl p-3 flex flex-col justify-between shadow-xs cursor-pointer hover:bg-[#E0F2FE] hover:shadow-md transition-all group"
+              >
+                <span className="text-[11px] font-bold text-gray-800 block mb-1.5 font-sans">Decor Shape</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-1">
+                    <div className="h-6 w-6 rounded-lg bg-[#2563EB]/20 border border-[#2563EB]/40 flex items-center justify-center text-[10px] font-bold text-[#2563EB]">
+                      🔲
+                    </div>
+                    <span className="text-[11px] font-bold text-gray-800 line-clamp-1">
+                      {product.decorShape || product.subCategory || "Wall Decor"}
+                    </span>
+                  </div>
+                  <div className="p-1 bg-[#2563EB] text-white rounded-full shrink-0 group-hover:scale-110 transition-transform">
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Includes */}
+              <div 
+                onClick={() => setActiveTabModal('includes')}
+                className="bg-[#E0F2FE]/80 border border-[#BAE6FD] rounded-2xl p-3 flex flex-col justify-between shadow-xs cursor-pointer hover:bg-[#E0F2FE] hover:shadow-md transition-all group"
+              >
+                <span className="text-[11px] font-bold text-gray-800 block mb-1.5 font-sans">Includes</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex -space-x-1.5 overflow-hidden">
+                    <span className="inline-flex h-6 w-6 rounded-full bg-amber-400 text-white items-center justify-center text-[10px] font-bold">🎈</span>
+                    <span className="inline-flex h-6 w-6 rounded-full bg-emerald-500 text-white items-center justify-center text-[10px] font-bold">✨</span>
+                    <span className="inline-flex h-6 w-6 rounded-full bg-amber-200 text-amber-800 items-center justify-center text-[10px] font-bold">🌸</span>
+                  </div>
+                  <div className="p-1 bg-[#2563EB] text-white rounded-full shrink-0 group-hover:scale-110 transition-transform">
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* ── Main Product Title & Price Card ── */}
+            <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm space-y-4 border border-gray-150">
+              
+              {/* Category & Rating Row */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1.5">
+                  <div className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold border border-[#BFDBFE]">
+                    <span>🔲</span>
+                    <span>{product.subCategory || product.category || "Wall Decor"}</span>
+                  </div>
+                  <h1 className="text-xl sm:text-2xl font-serif font-black text-gray-900 leading-tight">
+                    {product.title}
+                  </h1>
+                </div>
+
+                {/* Rating Badge */}
+                <div className="px-3 py-1.5 rounded-2xl bg-[#EFF6FF] text-[#1E40AF] text-sm font-bold flex items-center gap-1.5 shrink-0 border border-[#BFDBFE] shadow-xs">
+                  <Star className="h-4 w-4 fill-[#2563EB] text-[#2563EB]" />
+                  <span>{avgScore}</span>
+                </div>
+              </div>
+
+              {/* Price Row */}
+              <div className="flex items-baseline space-x-3 pt-1 border-t border-gray-100">
+                <span className="text-3xl sm:text-4xl font-black text-gray-900">₹{product.price}</span>
+                <span className="text-base text-gray-400 line-through font-medium">₹{originalPrice}</span>
+                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                  ₹{savings} OFF ({product.discount || "Special Offer"})
                 </span>
               </div>
-              <div className="p-1 bg-[#2563EB] text-white rounded-full shrink-0">
-                <ChevronRight className="h-3 w-3" />
+
+              {/* Balloon Customisable Guarantee Banner */}
+              <div className="bg-[#EFF6FF] border border-[#BFDBFE]/60 rounded-2xl py-3 px-4 text-center text-xs font-bold text-[#1D4ED8] flex items-center justify-center space-x-2">
+                <span className="text-base">🎈</span>
+                <span>Balloon Colour & Design are 100% customisable as per your theme preference</span>
               </div>
-            </div>
-          </div>
 
-          {/* Card 3: Includes */}
-          <div 
-            onClick={() => setActiveTabModal('includes')}
-            className="bg-[#E0F2FE]/80 border border-[#BAE6FD] rounded-2xl p-2.5 flex flex-col justify-between shadow-xs cursor-pointer hover:bg-[#E0F2FE] transition-all"
-          >
-            <span className="text-[10px] font-bold text-gray-700 block mb-1">Includes</span>
-            <div className="flex items-center justify-between">
-              <div className="flex -space-x-1.5 overflow-hidden">
-                <span className="inline-flex h-6 w-6 rounded-full bg-amber-400 text-white items-center justify-center text-[10px] font-bold">🎈</span>
-                <span className="inline-flex h-6 w-6 rounded-full bg-emerald-500 text-white items-center justify-center text-[10px] font-bold">✨</span>
-                <span className="inline-flex h-6 w-6 rounded-full bg-amber-200 text-amber-800 items-center justify-center text-[10px] font-bold">🌸</span>
+              {/* Desktop Direct Booking CTA Buttons */}
+              <div className="hidden lg:flex items-center gap-3 pt-2">
+                <button
+                  onClick={handleBookNow}
+                  className="flex-1 py-3.5 px-6 bg-[#2563EB] hover:bg-blue-700 text-white rounded-2xl text-sm font-black uppercase tracking-wider flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                >
+                  <Calendar className="h-4 w-4" />
+                  <span>Book Package Now</span>
+                </button>
+                <button
+                  onClick={handleAddToCart}
+                  className="py-3.5 px-5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl text-sm font-bold flex items-center justify-center space-x-2 transition-all cursor-pointer"
+                  title="Add to Cart"
+                >
+                  <ShoppingCart className="h-4 w-4 text-[#2563EB]" />
+                  <span>Add to Cart</span>
+                </button>
               </div>
-              <div className="p-1 bg-[#2563EB] text-white rounded-full shrink-0">
-                <ChevronRight className="h-3 w-3" />
-              </div>
-            </div>
-          </div>
 
-        </div>
-
-        {/* ── 3. Main Product Title & Price Info Card ── */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3.5 border border-gray-100">
-          
-          {/* Row 1: SubCategory Tag, Title & Star Rating */}
-          <div className="flex items-start justify-between gap-2">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-[#EFF6FF] text-[#1D4ED8] text-[11px] font-bold border border-[#BFDBFE]">
-                <span className="text-[10px]">🔲</span>
-                <span>{product.subCategory || product.category || "Wall Decor"}</span>
-              </div>
-              <h1 className="text-base sm:text-lg font-bold text-gray-900 leading-snug">
-                {product.title}
-              </h1>
             </div>
 
-            {/* Star Rating Badge */}
-            <div className="px-2.5 py-1 rounded-xl bg-[#EFF6FF] text-[#1E40AF] text-xs font-bold flex items-center gap-1 shrink-0 border border-[#BFDBFE]">
-              <Star className="h-3.5 w-3.5 fill-[#2563EB] text-[#2563EB]" />
-              <span>{product.rating || "4.9"}</span>
-            </div>
-          </div>
+            {/* ── Setup Date, Location & Slot Card ── */}
+            <div className="bg-white rounded-3xl p-5 shadow-sm space-y-3.5 border border-gray-150">
+              <h3 className="text-xs font-black uppercase tracking-wider text-gray-700 flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 text-[#2563EB]" />
+                <span>Select Event Date & Time Slot</span>
+              </h3>
 
-          {/* Row 2: Price Section */}
-          <div className="flex items-baseline space-x-2 pt-0.5">
-            <span className="text-sm text-gray-400 line-through font-medium">₹{originalPrice}</span>
-            <span className="text-2xl font-black text-gray-900">₹{product.price}</span>
-            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
-              ₹{savings} OFF
-            </span>
-          </div>
-
-
-
-          {/* Row 4: Customisable Guarantee Banner */}
-          <div className="bg-[#EFF6FF] rounded-xl py-2 px-3 text-center text-xs font-bold text-[#1D4ED8] flex items-center justify-center space-x-1.5">
-            <span className="text-sm">🎈</span>
-            <span>Balloon Colour & Design are customisable</span>
-          </div>
-
-        </div>
-
-        {/* ── 4. Setup Date, Location & Slot Card ── */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3 border border-gray-100">
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-bold text-gray-600 mb-1">Event Date</label>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-800 focus:outline-none focus:border-[#2563EB]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-gray-600 mb-1">Time Slot</label>
-              <select
-                value={selectedSlot}
-                onChange={(e) => setSelectedSlot(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-800 focus:outline-none focus:border-[#2563EB]"
-              >
-                <option value="Morning (8:00 AM - 11:00 AM)">Morning (8:00 AM - 11:00 AM)</option>
-                <option value="Afternoon (1:00 PM - 4:00 PM)">Afternoon (1:00 PM - 4:00 PM)</option>
-                <option value="Evening (5:00 PM - 8:00 PM)">Evening (5:00 PM - 8:00 PM)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* ── 4.5 Rating & Reviews Section (Matches User Screenshot) ── */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm space-y-5 border border-gray-100 font-sans">
-          
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-gray-900 font-sans">
-              Rating & Reviews
-            </h3>
-            <span className="text-xs font-bold text-gray-500">
-              {totalReviews} verified reviews
-            </span>
-          </div>
-
-          {/* Overall Rating & Star Breakdown */}
-          <div className="flex items-center gap-6 bg-gray-50/70 p-4 rounded-2xl border border-gray-150">
-            
-            {/* Left Score Box */}
-            <div className="flex flex-col items-center justify-center space-y-1.5 pr-2 shrink-0">
-              <div className="flex items-center space-x-1.5">
-                <span className="text-3xl font-black text-gray-900">{avgScore}</span>
-                <Star className="h-7 w-7 fill-[#2563EB] text-[#2563EB]" />
-              </div>
-              <span className="bg-blue-100 text-[#2563EB] text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <span>😀</span>
-                <span>Excellent</span>
-              </span>
-            </div>
-
-            {/* Right Progress Bars (5★, 4★, 3★, 2★, 1★) */}
-            <div className="flex-1 space-y-1.5">
-              {[5, 4, 3, 2, 1].map((star) => {
-                const count = starCounts[star] || 0;
-                const pct = totalReviews > 0 ? Math.round((count / totalReviews) * 100) : (star === 5 ? 90 : star === 4 ? 10 : 0);
-                return (
-                  <div key={star} className="flex items-center space-x-2 text-xs font-bold text-gray-600">
-                    <span className="w-6 text-right shrink-0 flex items-center justify-end gap-0.5">
-                      {star} <Star className="h-3 w-3 fill-[#2563EB] text-[#2563EB]" />
-                    </span>
-                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#2563EB] rounded-full transition-all duration-500"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="w-9 text-right text-[11px] text-gray-500 shrink-0 font-mono">{pct}%</span>
-                  </div>
-                );
-              })}
-            </div>
-
-          </div>
-
-          {/* Individual Customer Reviews List */}
-          <div className="divide-y divide-gray-100 pt-1">
-            {reviewsList.map((rev, idx) => (
-              <div key={rev.id || idx} className="py-3.5 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2.5">
-                    <div className="h-7 w-7 rounded-full bg-[#2563EB] text-white font-bold text-xs flex items-center justify-center font-sans shrink-0 shadow-xs">
-                      {(rev.reviewerName || "Customer").charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-gray-900 flex items-center gap-1 font-sans">
-                        <span>{rev.reviewerName || "Verified Customer"}</span>
-                        <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 fill-blue-100 shrink-0" />
-                      </h4>
-                      <div className="flex gap-0.5 mt-0.5">
-                        {[...Array(rev.rating || 5)].map((_, i) => (
-                          <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <span className="text-[10px] text-gray-400 font-bold uppercase">{rev.date || "Verified"}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-600 mb-1">Event Date</label>
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:border-[#2563EB]"
+                  />
                 </div>
-                <p className="text-xs text-gray-700 leading-relaxed font-sans pl-9 italic">
-                  "{rev.comment}"
-                </p>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-600 mb-1">Time Slot</label>
+                  <select
+                    value={selectedSlot}
+                    onChange={(e) => setSelectedSlot(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:border-[#2563EB] cursor-pointer"
+                  >
+                    <option value="Morning (8:00 AM - 11:00 AM)">Morning (8:00 AM - 11:00 AM)</option>
+                    <option value="Afternoon (1:00 PM - 4:00 PM)">Afternoon (1:00 PM - 4:00 PM)</option>
+                    <option value="Evening (5:00 PM - 8:00 PM)">Evening (5:00 PM - 8:00 PM)</option>
+                  </select>
+                </div>
               </div>
-            ))}
+            </div>
+
+            {/* ── Rating & Reviews Section ── */}
+            <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm space-y-5 border border-gray-150">
+              
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-gray-900 font-sans">
+                  Rating & Reviews
+                </h3>
+                <span className="text-xs font-bold text-gray-500">
+                  {totalReviews} verified reviews
+                </span>
+              </div>
+
+              {/* Overall Rating & Star Breakdown */}
+              <div className="flex items-center gap-6 bg-gray-50/80 p-4 rounded-2xl border border-gray-150">
+                
+                {/* Left Score Box */}
+                <div className="flex flex-col items-center justify-center space-y-1.5 pr-2 shrink-0">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-3xl font-black text-gray-900">{avgScore}</span>
+                    <Star className="h-7 w-7 fill-[#2563EB] text-[#2563EB]" />
+                  </div>
+                  <span className="bg-blue-100 text-[#2563EB] text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <span>😀</span>
+                    <span>Excellent</span>
+                  </span>
+                </div>
+
+                {/* Right Progress Bars (5★, 4★, 3★, 2★, 1★) */}
+                <div className="flex-1 space-y-1.5">
+                  {[5, 4, 3, 2, 1].map((star) => {
+                    const count = starCounts[star] || 0;
+                    const pct = totalReviews > 0 ? Math.round((count / totalReviews) * 100) : (star === 5 ? 90 : star === 4 ? 10 : 0);
+                    return (
+                      <div key={star} className="flex items-center space-x-2 text-xs font-bold text-gray-600">
+                        <span className="w-6 text-right shrink-0 flex items-center justify-end gap-0.5">
+                          {star} <Star className="h-3 w-3 fill-[#2563EB] text-[#2563EB]" />
+                        </span>
+                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#2563EB] rounded-full transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="w-9 text-right text-[11px] text-gray-500 shrink-0 font-mono">{pct}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+              </div>
+
+              {/* Individual Customer Reviews List */}
+              <div className="divide-y divide-gray-100 pt-1">
+                {reviewsList.map((rev, idx) => (
+                  <div key={rev.id || idx} className="py-3.5 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2.5">
+                        <div className="h-7 w-7 rounded-full bg-[#2563EB] text-white font-bold text-xs flex items-center justify-center font-sans shrink-0 shadow-xs">
+                          {(rev.reviewerName || "Customer").charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-gray-900 flex items-center gap-1 font-sans">
+                            <span>{rev.reviewerName || "Verified Customer"}</span>
+                            <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 fill-blue-100 shrink-0" />
+                          </h4>
+                          <div className="flex gap-0.5 mt-0.5">
+                            {[...Array(rev.rating || 5)].map((_, i) => (
+                              <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-gray-400 font-bold uppercase">{rev.date || "Verified"}</span>
+                    </div>
+                    <p className="text-xs text-gray-700 leading-relaxed font-sans pl-9 italic">
+                      "{rev.comment}"
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+
           </div>
 
         </div>
-
       </div>
 
-      {/* ── 5. Fixed Sticky Bottom Action Bar (Mobile & Desktop) ── */}
-      <div className="fixed bottom-[56px] md:bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2.5 z-40 shadow-2xl">
+      {/* ── Fixed Sticky Bottom Action Bar (Mobile Screens Only) ── */}
+      <div className="lg:hidden fixed bottom-[56px] md:bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2.5 z-40 shadow-2xl">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           
           {/* Price & Savings info */}

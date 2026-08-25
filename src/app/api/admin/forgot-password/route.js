@@ -24,7 +24,7 @@ export async function POST(req) {
     const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
     const smtpPort = parseInt(process.env.SMTP_PORT || "587", 10);
     const smtpUser = process.env.SMTP_USER || "prmohan.hyd@gmail.com";
-    const smtpPass = process.env.SMTP_PASSWORD || "edbydlyidzbnrmky";
+    const smtpPass = process.env.SMTP_PASSWORD || "taodjltaahviyfit";
     const smtpFrom = process.env.SMTP_FROM || `"Decor Dazzlers Admin" <${smtpUser}>`;
 
     const transporter = nodemailer.createTransport({

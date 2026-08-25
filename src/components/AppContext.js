@@ -305,10 +305,10 @@ export function AppProvider({ children }) {
     loadSupabaseData();
   }, [loadSupabaseData]);
 
-  // 4. Supabase Real-time Database Synchronization across Vercel & Localhost
+  // 4. Supabase Real-time Database & Broadcast Synchronization across Vercel & Localhost
   useEffect(() => {
     const channel = supabase
-      .channel("supabase-realtime-sync")
+      .channel("decor-global-sync")
       .on(
         "postgres_changes",
         { event: "*", schema: "public" },
@@ -316,10 +316,40 @@ export function AppProvider({ children }) {
           loadSupabaseData();
         }
       )
+      .on(
+        "broadcast",
+        { event: "db_updated" },
+        () => {
+          loadSupabaseData();
+        }
+      )
       .subscribe();
+
+    // Re-sync immediately when tab is focused or becomes visible
+    const handleFocus = () => {
+      loadSupabaseData();
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadSupabaseData();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Heartbeat auto-sync every 12 seconds when active
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        loadSupabaseData();
+      }
+    }, 12000);
 
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      clearInterval(interval);
     };
   }, [loadSupabaseData]);
 
@@ -350,6 +380,17 @@ export function AppProvider({ children }) {
   }, []);
 
   // --- Sanitizers & Helpers ---
+  const broadcastSyncEvent = async (action, details = {}) => {
+    try {
+      const syncChannel = supabase.channel("decor-global-sync");
+      await syncChannel.send({
+        type: "broadcast",
+        event: "db_updated",
+        payload: { action, details, timestamp: Date.now() },
+      });
+    } catch (e) {}
+  };
+
   const sanitizeDbService = (s) => ({
     id: String(s.id),
     title: s.title || "Decoration Package",
@@ -398,6 +439,7 @@ export function AppProvider({ children }) {
         span: "col-span-1",
         aspect: "1/1",
       }, { onConflict: "id" });
+      broadcastSyncEvent("update_hero_video");
     } catch (e) {
       console.error("Supabase hero video update error:", e);
     }
@@ -419,6 +461,7 @@ export function AppProvider({ children }) {
         span: "col-span-1",
         aspect: "1/1",
       }, { onConflict: "id" });
+      broadcastSyncEvent("add_subcategory");
     } catch (e) {
       console.error("Supabase subcategories update error:", e);
     }
@@ -437,6 +480,7 @@ export function AppProvider({ children }) {
         span: "col-span-1",
         aspect: "1/1",
       }, { onConflict: "id" });
+      broadcastSyncEvent("delete_subcategory");
     } catch (e) {
       console.error("Supabase subcategories delete error:", e);
     }
@@ -461,6 +505,7 @@ export function AppProvider({ children }) {
       const dbPayload = sanitizeDbService(serviceObj);
       const { error } = await supabase.from("services").insert([dbPayload]);
       if (error) console.error("Supabase insert error:", error.message);
+      broadcastSyncEvent("add_service", { id: serviceObj.id });
     } catch (e) {
       console.error("Supabase insert error:", e);
     }
@@ -486,6 +531,7 @@ export function AppProvider({ children }) {
       };
       const { error } = await supabase.from("services").update(dbPayload).eq("id", id);
       if (error) console.error("Supabase update error:", error.message);
+      broadcastSyncEvent("update_service", { id });
     } catch (e) {
       console.error("Supabase update error:", e);
     }
@@ -501,6 +547,7 @@ export function AppProvider({ children }) {
     try {
       const { error } = await supabase.from("services").delete().eq("id", id);
       if (error) console.error("Supabase delete error:", error.message);
+      broadcastSyncEvent("delete_service", { id });
     } catch (e) {
       console.error("Supabase delete error:", e);
     }
@@ -522,6 +569,7 @@ export function AppProvider({ children }) {
     try {
       const { error } = await supabase.from("gallery").insert([galleryObj]);
       if (error) console.error("Supabase gallery insert error:", error.message);
+      broadcastSyncEvent("add_gallery", { id: galleryObj.id });
     } catch (e) {
       console.error("Supabase gallery insert error:", e);
     }
@@ -544,6 +592,7 @@ export function AppProvider({ children }) {
       };
       const { error } = await supabase.from("gallery").update(payload).eq("id", id);
       if (error) console.error("Supabase gallery update error:", error.message);
+      broadcastSyncEvent("update_gallery", { id });
     } catch (e) {
       console.error("Supabase gallery update error:", e);
     }
@@ -559,6 +608,7 @@ export function AppProvider({ children }) {
     try {
       const { error } = await supabase.from("gallery").delete().eq("id", id);
       if (error) console.error("Supabase gallery delete error:", error.message);
+      broadcastSyncEvent("delete_gallery", { id });
     } catch (e) {
       console.error("Supabase gallery delete error:", e);
     }
@@ -585,6 +635,7 @@ export function AppProvider({ children }) {
         span: "col-span-1",
         aspect: "1/1",
       }, { onConflict: "id" });
+      broadcastSyncEvent("add_slider");
     } catch (e) {
       console.error("Supabase slider upsert error:", e);
     }
@@ -604,6 +655,7 @@ export function AppProvider({ children }) {
         span: "col-span-1",
         aspect: "1/1",
       }, { onConflict: "id" });
+      broadcastSyncEvent("update_slider");
     } catch (e) {
       console.error("Supabase slider update error:", e);
     }
@@ -623,6 +675,7 @@ export function AppProvider({ children }) {
         span: "col-span-1",
         aspect: "1/1",
       }, { onConflict: "id" });
+      broadcastSyncEvent("delete_slider");
     } catch (e) {
       console.error("Supabase slider delete error:", e);
     }
@@ -641,6 +694,7 @@ export function AppProvider({ children }) {
     try {
       const { error } = await supabase.from("category_posters").insert([posterObj]);
       if (error) console.error("Supabase category poster insert error:", error.message);
+      broadcastSyncEvent("add_category_poster");
     } catch (e) {
       console.error("Supabase category poster insert error:", e);
     }
@@ -663,6 +717,7 @@ export function AppProvider({ children }) {
       };
       const { error } = await supabase.from("category_posters").update(payload).eq("id", id);
       if (error) console.error("Supabase category poster update error:", error.message);
+      broadcastSyncEvent("update_category_poster");
     } catch (e) {
       console.error("Supabase category poster update error:", e);
     }
@@ -678,6 +733,7 @@ export function AppProvider({ children }) {
     try {
       const { error } = await supabase.from("category_posters").delete().eq("id", id);
       if (error) console.error("Supabase category poster delete error:", error.message);
+      broadcastSyncEvent("delete_category_poster");
     } catch (e) {
       console.error("Supabase category poster delete error:", e);
     }
@@ -713,6 +769,7 @@ export function AppProvider({ children }) {
         created_at: bookingObj.created_at,
       }]);
       if (error) console.error("Supabase booking insert error:", error.message);
+      broadcastSyncEvent("add_booking");
     } catch (e) {
       console.error("Supabase booking insert error:", e);
     }
@@ -728,6 +785,7 @@ export function AppProvider({ children }) {
     try {
       const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
       if (error) console.error("Supabase booking status update error:", error.message);
+      broadcastSyncEvent("update_booking");
     } catch (e) {
       console.error("Supabase booking status update error:", e);
     }
@@ -743,6 +801,7 @@ export function AppProvider({ children }) {
     try {
       const { error } = await supabase.from("bookings").delete().eq("id", id);
       if (error) console.error("Supabase booking delete error:", error.message);
+      broadcastSyncEvent("delete_booking");
     } catch (e) {
       console.error("Supabase booking delete error:", e);
     }

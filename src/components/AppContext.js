@@ -311,11 +311,25 @@ export function AppProvider({ children }) {
     loadSupabaseData();
   }, [loadSupabaseData]);
 
+  const sanitizeDbService = (s) => ({
+    id: s.id,
+    title: s.title || "Decoration Package",
+    category: s.category || "Birthday",
+    subCategory: s.subCategory || s.decorShape || "Wall Decor",
+    price: Number(s.price) || 2999,
+    originalPrice: Number(s.originalPrice) || 3999,
+    discount: s.discount || "25% OFF",
+    rating: Number(s.rating) || 4.8,
+    image: s.image || (s.images && s.images[0]) || "/images/birthday_decor.png",
+    created_at: s.created_at || new Date().toISOString(),
+  });
+
   // SERVICES CRUD
   const addService = async (newService) => {
     const serviceObj = {
-      id: "CLA" + Math.floor(100 + Math.random() * 900),
+      id: newService.id || "CLA" + Math.floor(100 + Math.random() * 900),
       ...newService,
+      subCategory: newService.subCategory || newService.decorShape || "Wall Decor",
       created_at: new Date().toISOString(),
     };
 
@@ -326,7 +340,9 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("services").insert([serviceObj]);
+      const dbPayload = sanitizeDbService(serviceObj);
+      const { error } = await supabase.from("services").insert([dbPayload]);
+      if (error) console.error("Supabase insert error:", error.message);
     } catch (e) {
       console.error("Supabase insert error:", e);
     }
@@ -340,7 +356,18 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("services").update(updatedService).eq("id", id);
+      const dbPayload = {
+        title: updatedService.title,
+        category: updatedService.category,
+        subCategory: updatedService.subCategory || updatedService.decorShape || "Wall Decor",
+        price: Number(updatedService.price),
+        originalPrice: Number(updatedService.originalPrice),
+        discount: updatedService.discount,
+        rating: Number(updatedService.rating),
+        image: updatedService.image || (updatedService.images && updatedService.images[0]),
+      };
+      const { error } = await supabase.from("services").update(dbPayload).eq("id", id);
+      if (error) console.error("Supabase update error:", error.message);
     } catch (e) {
       console.error("Supabase update error:", e);
     }
@@ -354,7 +381,8 @@ export function AppProvider({ children }) {
     });
 
     try {
-      await supabase.from("services").delete().eq("id", id);
+      const { error } = await supabase.from("services").delete().eq("id", id);
+      if (error) console.error("Supabase delete error:", error.message);
     } catch (e) {
       console.error("Supabase delete error:", e);
     }

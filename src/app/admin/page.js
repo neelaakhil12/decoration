@@ -273,10 +273,29 @@ export default function AdminDashboardPage() {
   // Submit Gallery Form (Add or Edit)
   const handleSaveGalleryItem = async (e) => {
     e.preventDefault();
+    const hasVideo = !!(galleryForm.videoUrl && galleryForm.videoUrl.trim().length > 0);
+    const finalType = hasVideo ? "video" : (galleryForm.type || "image");
+
+    let finalImage = galleryForm.image?.trim();
+    if (!finalImage || finalImage === "") {
+      if (hasVideo && galleryForm.videoUrl.includes("res.cloudinary.com")) {
+        finalImage = galleryForm.videoUrl.replace(/\.[^/.]+$/, ".jpg");
+      } else {
+        finalImage = "/images/birthday_decor.png";
+      }
+    }
+
+    const payload = {
+      ...galleryForm,
+      type: finalType,
+      image: finalImage,
+      videoUrl: galleryForm.videoUrl?.trim() || null,
+    };
+
     if (editingGalleryItem) {
-      await updateGalleryItem(editingGalleryItem.id, galleryForm);
+      await updateGalleryItem(editingGalleryItem.id, payload);
     } else {
-      await addGalleryItem(galleryForm);
+      await addGalleryItem(payload);
     }
 
     setGalleryModalOpen(false);
@@ -2162,7 +2181,10 @@ export default function AdminDashboardPage() {
                       onChange={(e) => handleFileUpload(e, "video", (url) => setGalleryForm((prev) => ({ 
                         ...prev, 
                         type: "video", 
-                        videoUrl: url 
+                        videoUrl: url,
+                        image: (!prev.image || prev.image === "/images/birthday_decor.png") 
+                          ? (url.includes("res.cloudinary.com") ? url.replace(/\.[^/.]+$/, ".jpg") : prev.image)
+                          : prev.image
                       })))}
                     />
                   </label>
